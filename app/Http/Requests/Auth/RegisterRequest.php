@@ -62,7 +62,7 @@ class RegisterRequest extends FormRequest
             'email.required' => 'حقل :attribute مطلوب لا يمكن ان يكون فارغا',
             'email' => 'حقل :attribute يجب ان يكون بصيغة صحيحة مثل test@example.com',
             'email.unique' => 'هذا :attribute موجود بالفعل في بياناتنا',
-            'min' => 'حقل :attribute يجب ان يكون 8 محارف على الاقل',
+            'min' => 'حقل :attribute يجب ان يكون 12 محارف على الاقل',
             'password.regex' => [
                 'regex:/[A-Z]/' => 'حقل :attribute يجب أن يحتوي على حرف كبير واحد على الأقل',
                 'regex:/[a-z]/' => 'حقل :attribute يجب أن يحتوي على حرف صغير واحد على الأقل',

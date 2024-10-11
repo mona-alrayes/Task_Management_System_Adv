@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Auth;
+namespace App\Http\Controllers\Auth;
 
 use Illuminate\Http\Request;
 use App\Services\AuthService;
@@ -61,7 +61,7 @@ class AuthController extends Controller
     {
         
         $user=$this->authService->register($request->validated());
-
+        
         return response()->json([
             'status' => 'success',
             'message' => 'User created successfully',

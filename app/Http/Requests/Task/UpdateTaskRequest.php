@@ -13,7 +13,7 @@ class UpdateTaskRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false; // Change this to true if authorization is needed
+        return true; // Change this to true if authorization is needed
     }
 
     /**
