@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Task;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use App\Services\Task\TaskService;
 use App\Http\Requests\Task\StoreTaskRequest;
 use App\Http\Requests\Task\UpdateTaskRequest;
-use App\Models\Task;
-use App\Services\TaskService;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
@@ -25,8 +25,8 @@ class TaskController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        ${{ modelVariablePlural }} = $this->TaskService->getTasks($request);
-        return self::paginated(${{ modelVariablePlural }}, 'Tasks retrieved successfully', 200);
+        $tasks = $this->TaskService->getTasks($request);
+        return self::paginated($tasks, 'Tasks retrieved successfully', 200);
     }
 
     /**
@@ -71,8 +71,8 @@ class TaskController extends Controller
      */
     public function showDeleted(): JsonResponse
     {
-        ${{ modelVariablePlural }} = Task::onlyTrashed()->get();
-        return self::success(${{ modelVariablePlural }}, 'Tasks retrieved successfully');
+        $softdeleted = Task::onlyTrashed()->get();
+        return self::success($softdeleted, 'Deleted Tasks retrieved successfully');
     }
 
     /**
