@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
  */
 class AuthService
 {
+    //TODO go back here to see how to improve messages and error handling
 
     public function login(array $data): array
     {
@@ -26,35 +27,35 @@ class AuthService
                 'email' => $data['email'],
                 'password' => $data['password'],
             ];
+    
             $token = Auth::attempt($credentials);
 
             if (!$token) {
-                return response()->json([
-                    'status' => 'خطأ',
-                    'message' => 'غير مخول',
-                ], 401);
+                // Return consistent response structure on failure
+                return [
+                    'status' => 'error',
+                    'message' => 'غير مخول', // Unauthorized
+                ];
             }
+    
             // Get authenticated user
             $user = Auth::user();
+    
             return [
                 'user' => $user,
                 'token' => $token,
             ];
         } catch (Exception $e) {
-            // Handle any exceptions that may occur
-            Log::error(['error'=> $e->getMessage()]);
-            return response()->json([
-                'status' => 'خطأ',
-                'message' => 'حدث خطأ اثناء عملية الدخول.',
-            ],500);
+            // Log any exceptions that may occur
+            Log::error(['error' => $e->getMessage()]);
+    
+            return [
+                'status' => 'error',
+                'message' => 'حدث خطأ اثناء عملية الدخول.', // Error during login
+            ];
         }
-        // }catch(ModelNotFoundException $e){
-        //     Log::error(['error'=> $e->getMessage()]);
-        //     return response()->json([
-        //         'message' => ' لم يتم العثور على موديل المستخدم !',
-        //     ], 404);
-        // }
     }
+    
 
 
     /**
@@ -77,16 +78,16 @@ class AuthService
             $user->email = $data['email'];
             $user->password = $data['password'];
             $user->save();
-            
+
             // Generate a JWT token for the user
             $token = Auth::login(user: $user);
-            
+
             return [
                 'user' => $user,
                 'token' => $token,
             ];
         } catch (Exception $e) {
-            Log::error(['error'=> $e->getMessage()]);
+            Log::error(['error' => $e->getMessage()]);
             return [
                 'status' => 'خطأ',
                 'message' => 'حدث خطأ اثناء عملية إنشاء الحساب',
