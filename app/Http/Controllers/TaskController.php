@@ -72,6 +72,9 @@ class TaskController extends Controller
     public function showDeleted(): JsonResponse
     {
         $softdeleted = Task::onlyTrashed()->get();
+        if(!$softdeleted){
+            return self::error(null,'no soft-deleted tasks found', 404);
+        }
         return self::success($softdeleted, 'Deleted Tasks retrieved successfully');
     }
 
