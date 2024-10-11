@@ -20,6 +20,10 @@ return new class extends Migration
             $table->softDeletes(); 
             $table->rememberToken();
             $table->timestamps();
+            $table->index('name');           //adding indexing to make table faster 
+            $table->index('created_at');    
+            $table->index('updated_at'); 
+            $table->index('deleted_at');     
         });
     }
 

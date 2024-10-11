@@ -21,7 +21,14 @@ class TaskService
     public function getTasks($request): LengthAwarePaginator
     {
         try {
-           $tasks= Task::all()->with('comments')->paginate();
+            // return all tasks with all types of filters on the data retrived
+           $tasks= Task::all()
+           ->when($request->type , fn($q)=> $q->type($request->type))
+           ->when($request->status , fn($q)=> $q->status($request->status))
+           ->when($request->assigned_to, fn($q)=> $q->assigned_to($request->assigned_))
+           ->when($request->due_date , fn($q)=> $q->due_date($request->due_date))
+           ->when($request->priority , fn($q)=> $q->priority($request->priority))
+           ->paginate();
            return $tasks;
         } catch (Exception $exception) {
             Log::error($exception->getMessage());

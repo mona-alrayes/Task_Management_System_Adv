@@ -14,9 +14,13 @@ return new class extends Migration
         Schema::create('comments', function (Blueprint $table) {
             $table->id();
             $table->string('comment');
-            $table->morphs('commentable');
+            $table->morphs('commentable'); // This creates commentable_type and commentable_id
             $table->softDeletes(); 
             $table->timestamps();
+            
+            // Indexes for optimization
+            $table->index(['commentable_type', 'commentable_id']); // Index for polymorphic relation
+            $table->index('deleted_at'); // Index for soft deletes
         });
     }
 
