@@ -1,0 +1,100 @@
+<?php
+
+namespace {{ namespace }};
+
+use {{ namespacedModel }};
+use {{ rootNamespace }}Http\Requests\{{ model }}\Store{{ model }}Request;
+use {{ rootNamespace }}Http\Requests\{{ model }}\Update{{ model }}Request;
+use {{ rootNamespace }}Services\{{ model }}Service;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+class {{ class }} extends Controller
+{
+
+    protected {{ model }}Service ${{ model }}Service;
+
+    public function __construct({{ model }}Service ${{ model }}Service)
+    {
+        $this->{{ model }}Service = ${{ model }}Service;
+    }
+
+    /**
+     * Display a listing of the resource.
+     * @throws \Exception
+     */
+    public function index(Request $request): JsonResponse
+    {
+        ${{ modelVariablePlural }} = $this->{{ model }}Service->get{{ model }}s($request);
+        return self::paginated(${{ modelVariablePlural }}, '{{ model }}s retrieved successfully', 200);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     * @throws \Exception
+     */
+    public function store(Store{{ model }}Request $request): JsonResponse
+    {
+        ${{ modelVariable }} = $this->{{ model }}Service->store{{ model }}($request->validated());
+        return self::success(${{ modelVariable }}, '{{ model }} created successfully', 201);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show({{ model }} ${{ modelVariable }}): JsonResponse
+    {
+        return self::success(${{ modelVariable }}, '{{ model }} retrieved successfully');
+    }
+
+    /**
+     * Update the specified resource in storage.
+     * @throws \Exception
+     */
+    public function update(Update{{ model }}Request $request, {{ model }} ${{ modelVariable }}): JsonResponse
+    {
+        $updated{{ model }} = $this->{{ model }}Service->update{{ model }}(${{ modelVariable }}, $request->validated());
+        return self::success($updated{{ model }}, '{{ model }} updated successfully');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy({{ model }} ${{ modelVariable }}): JsonResponse
+    {
+        ${{ modelVariable }}->delete();
+        return self::success(null, '{{ model }} deleted successfully');
+    }
+
+    /**
+     * Display soft-deleted records.
+     */
+    public function showDeleted(): JsonResponse
+    {
+        ${{ modelVariablePlural }} = {{ model }}::onlyTrashed()->get();
+        return self::success(${{ modelVariablePlural }}, '{{ model }}s retrieved successfully');
+    }
+
+    /**
+     * Restore a soft-deleted record.
+     * @param string $id
+     * @return JsonResponse
+     */
+    public function restoreDeleted(string $id): JsonResponse
+    {
+        ${{ modelVariable }} = {{ model }}::onlyTrashed()->findOrFail($id);
+        ${{ modelVariable }}->restore();
+        return self::success(${{ modelVariable }}, '{{ model }} restored successfully');
+    }
+
+    /**
+     * Permanently delete a soft-deleted record.
+     * @param string $id
+     * @return JsonResponse
+     */
+    public function forceDeleted(string $id): JsonResponse
+    {
+        ${{ modelVariable }} = {{ model }}::onlyTrashed()->findOrFail($id)->forceDelete();
+        return self::success(null, '{{ model }} force deleted successfully');
+    }
+}
