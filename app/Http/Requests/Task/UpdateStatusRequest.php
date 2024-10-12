@@ -61,7 +61,9 @@ class UpdateStatusRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        // Prepare your data before validation here
+        $this->merge([
+            'status' => ucwords($this->status),
+        ]);
     }
 
     /**
