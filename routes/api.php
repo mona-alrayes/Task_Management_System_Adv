@@ -22,6 +22,9 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('refresh', 'refresh');
 
 });
+Route::get('tasks/deleted', [TaskController::class , 'showDeleted']);
+Route::put('tasks/{id}/restore', [TaskController::class , 'restoreDeleted']);
+Route::delete('tasks/{id}/delete', [TaskController::class , 'forceDeleted']);
 Route::put('tasks/{id}/status', [TaskController::class , 'statusChange']);
 Route::get('tasks/blockedTasks', [TaskController::class , 'blockedTasks']);
 Route::post('tasks/{id}/assign' , [TaskController::class , 'assignTask']);

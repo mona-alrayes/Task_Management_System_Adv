@@ -87,14 +87,15 @@ class TaskService
     /**
      * reassigned Task to a User
      *
-     * @param  Task  $task
+     * @param  string  $id Task
      * @param  [type]  $Data
      * @return Task
      */
-    public function reassignTask(Task $task , $Data):Task
+    public function reassignTask(string $id , $Data):Task
     {
         try {
-            $task->update(['assigned_to' => $Data->assigned_to]);
+            $task = Task::findOrFail($id);
+            $task->update(['assigned_to' => $Data['assigned_to']]);
             return $task;
         } catch (Exception $e) {
             Log::error($e->getMessage());
@@ -115,20 +116,22 @@ class TaskService
      * @param  [type]  $Data
      * @return Task
      */
-    public function assignTask(Task $task , $Data):Task
-    {
-        try {
-            $task->update(['assigned_to' => $Data->assigned_to]);
-            return $task;
-        } catch (Exception $e) {
-            Log::error($e->getMessage());
-            throw new Exception('حدث خطأ أثناء محاولة تحديث البيانات');
-        }catch (ModelNotFoundException $e){
-            Log::error($e->getMessage());
-            throw new Exception('الموديل غير موجودة');
-        } catch (RelationNotFoundException $e){
-            Log::error($e->getMessage());
-            throw new Exception('خطأ في عملية التحقق من الرابط');
-        }
+    public function assignTask(string $id, array $Data): Task
+{
+    try {
+        $task = Task::findOrFail($id);
+        $task->update(['assigned_to' => $Data['assigned_to']]);
+        return $task;
+    } catch (ModelNotFoundException $e) {
+        Log::error("Task not found: " . $e->getMessage());
+        throw new Exception('الموديل غير موجودة');
+    } catch (Exception $e) {
+        Log::error('Update error: ' . $e->getMessage());
+        throw new Exception('حدث خطأ أثناء محاولة تحديث البيانات');
+    }catch (RelationNotFoundException $e){
+        Log::error($e->getMessage());
+        throw new Exception('خطأ في عملية التحقق من الرابط');
     }
+}
+
 }
