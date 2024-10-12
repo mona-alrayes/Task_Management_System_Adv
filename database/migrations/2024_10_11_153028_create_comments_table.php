@@ -17,9 +17,6 @@ return new class extends Migration
             $table->morphs('commentable'); // This creates commentable_type and commentable_id
             $table->softDeletes(); 
             $table->timestamps();
-            
-            // Indexes for optimization
-            $table->index(['commentable_type', 'commentable_id']); // Index for polymorphic relation
             $table->index('deleted_at'); // Index for soft deletes
         });
     }

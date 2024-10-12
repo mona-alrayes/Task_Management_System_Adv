@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\TaskController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,3 +22,9 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('refresh', 'refresh');
 
 });
+Route::put('tasks/{id}/status', [TaskController::class , 'statusChange']);
+Route::get('tasks/blockedTasks', [TaskController::class , 'blockedTasks']);
+Route::post('tasks/{id}/assign' , [TaskController::class , 'assignTask']);
+Route::put('tasks/{id}/reassign', [TaskController::class , 'reassignTask']);
+Route::apiResource('tasks', TaskController::class);
+

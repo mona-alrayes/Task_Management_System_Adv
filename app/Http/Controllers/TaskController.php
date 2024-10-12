@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Task\assignedToRequest;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Services\Task\TaskService;
 use App\Http\Requests\Task\StoreTaskRequest;
+use App\Http\Requests\Task\UpdateStatusRequest;
 use App\Http\Requests\Task\UpdateTaskRequest;
 
 class TaskController extends Controller
@@ -56,7 +58,49 @@ class TaskController extends Controller
         $updatedTask = $this->TaskService->updateTask($task, $request->validated());
         return self::success($updatedTask, 'Task updated successfully');
     }
+    /**
+     * Updating the status of the task
+     *
+     * @param  UpdateStatusRequest  $request
+     * @param  Task  $task
+     * @return JsonResponse
+     */
+    public function statusChange(UpdateStatusRequest $request, Task $task): JsonResponse
+    {
+        $updateStatus = $this->TaskService->updateTask($task, $request->validated());
+        return self::success($updateStatus, 'Task status Updated successfully');
+    }
+    /**
+     * reassignTask PUT Method
+     *
+     * @param  Request  $request
+     * @param  Task  $task
+     * @return void
+     */
+    public function reassignTask(assignedToRequest $request, Task $task){
+        $reassignedTask = $this->TaskService->reassignTask($task , $request->validated());
+        return self::success($reassignedTask, 'Task reassigned successfully');
+    }
+    /**
+     * assignTask Post Method
+     *
+     * @param  assignedToRequest  $request
+     * @param  Task  $task
+     * @return void
+     */
+    public function assignTask(assignedToRequest $request , Task $task){
+       $assignedTask = $this->TaskService->assignTask($task , $request->validated());
+       return self::success($assignedTask , 'Task been assgined To User Sucessfully');
+    }
 
+    public function blockedTasks(Request $request){
+        $blockedTasks = Task::blockedTasks();
+        return self::success($blockedTasks, 'Blocked tasks retrieved successfully');
+    }
+
+    public function addAttachment(Request $request , Task $task){
+
+    }
     /**
      * Remove the specified resource from storage.
      */

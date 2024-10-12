@@ -24,9 +24,15 @@ class StoreTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // Add your validation rules here
+            'title' => ['required', 'string', 'min:3', 'max:255'],
+            'description' => ['required', 'string', 'min:3', 'max:2000'],
+            'type' => ['required', 'string', 'in:Bug,Feature,Improvement'],
+            'priority' => ['required', 'string', 'in:Low,Medium,High'],
+            'due_date' => ['required', 'date_format:d-m-Y'], 
+            'assigned_to' => ['nullable', 'exists:users,id'], 
         ];
     }
+
 
     /**
      * Get the custom validation messages.
@@ -34,11 +40,20 @@ class StoreTaskRequest extends FormRequest
      * @return array<string, string>
      */
     public function messages(): array
-    {
-        return [
-            // Custom error messages
-        ];
-    }
+{
+    return [
+        'required' => 'الحقل :attribute مطلوب.',
+        'string' => 'الحقل :attribute يجب أن يكون نص.',
+        'min' => 'الحقل :attribute يجب أن يكون على الأقل :min حروف.',
+        'title.max' => 'الحقل العنوان لا يجب أن يتجاوز :max حروف.',
+        'description.max' => 'الحقل الوصف لا يجب أن يتجاوز :max حروف.',
+        'type.in' => 'نوع الحقل :attribute يجب أن يكون إما خطأ، ميزة، أو تحسين.',
+        'priority.in' => 'أولوية الحقل :attribute يجب أن تكون إما منخفضة، متوسطة، أو عالية.',
+        'due_date.date_format' => 'الحقل :attribute يجب أن يكون بتنسيق يوم-شهر-سنة.',
+        'assigned_to.exists' => 'المستخدم المحدد في الحقل :attribute غير موجود.',
+    ];
+}
+
 
     /**
      * Get custom attribute names.
@@ -48,7 +63,12 @@ class StoreTaskRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            // Custom attribute names
+          'title' => 'العنوان',
+          'description' => 'الوصف',
+          'type' => 'النوع',
+          'priority' => 'الأولوية',
+          'due_date' => 'التاريخ التسليم',
+          'assigned_to' => 'المعين للعمل',
         ];
     }
 
@@ -59,7 +79,10 @@ class StoreTaskRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        // Prepare your data before validation here
+        $this->merge([
+            'type' => ucwords($this->type),
+            'priority' => ucwords($this->priority),
+        ]);
     }
 
     /**

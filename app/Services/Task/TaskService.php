@@ -8,39 +8,38 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\RelationNotFoundException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Pagination\LengthAwarePaginator;
-
+use PhpParser\Node\Stmt\TryCatch;
 
 class TaskService
 {
 
-    /**
-     * get all Tasks with comments they have
-     * @return LengthAwarePaginator
-     * @throws Exception
-     */
     public function getTasks($request): LengthAwarePaginator
-    {
-        try {
-            // return all tasks with all types of filters on the data retrived
-           $tasks= Task::all()
-           ->when($request->type , fn($q)=> $q->type($request->type))
-           ->when($request->status , fn($q)=> $q->status($request->status))
-           ->when($request->assigned_to, fn($q)=> $q->assigned_to($request->assigned_))
-           ->when($request->due_date , fn($q)=> $q->due_date($request->due_date))
-           ->when($request->priority , fn($q)=> $q->priority($request->priority))
-           ->paginate();
-           return $tasks;
-        } catch (Exception $exception) {
-            Log::error($exception->getMessage());
-            throw new Exception('حدث خطأ أثناء محاولة جلب البيانات');
-        } catch (ModelNotFoundException $e){
-            Log::error($e->getMessage());
-            throw new Exception('الموديل غير موجودة');
-        } catch (RelationNotFoundException $e){
-            Log::error($e->getMessage());
-            throw new Exception('خطأ في عملية التحقق من الرابط');
-        }
+{
+    try {
+        // Use Task::query() to build a query with filters applied
+        $tasks = Task::query()
+            ->when($request->type, fn($q) => $q->where('type', $request->type))
+            ->when($request->status, fn($q) => $q->where('status', $request->status))
+            ->when($request->assigned_to, fn($q) => $q->where('assigned_to', $request->assigned_to)) // Fixed typo here
+            ->when($request->due_date, fn($q) => $q->whereDate('due_date', $request->due_date))
+            ->when($request->priority, fn($q) => $q->where('priority', $request->priority))
+            ->with('comments') // Eager load comments to avoid N+1 issue
+            ->paginate(10); // You can set a default value for pagination, like 10 tasks per page
+        
+        return $tasks;
+
+    } catch (Exception $exception) {
+        Log::error($exception->getMessage());
+        throw new Exception('حدث خطأ أثناء محاولة جلب البيانات');
+    } catch (ModelNotFoundException $e) {
+        Log::error($e->getMessage());
+        throw new Exception('الموديل غير موجودة');
+    } catch (RelationNotFoundException $e) {
+        Log::error($e->getMessage());
+        throw new Exception('خطأ في عملية التحقق من الرابط');
     }
+}
+
 
 
     /**
@@ -54,7 +53,7 @@ class TaskService
     {
         try {
             $task = Task::create($Data);
-            return $task->load('comments');
+            return $task;
         } catch (Exception $exception) {
             Log::error($exception->getMessage());
             throw new Exception('حدث خطأ أثناء محاولة تخزين البيانات');
@@ -73,10 +72,63 @@ class TaskService
     {
         try {
             $task->update(array_filter($Data));
-            return $task->load('comments');
+            return $task;
         } catch (Exception $exception) {
             Log::error($exception->getMessage());
             throw new Exception('حدث خطأ أثناء محاولة تحديث البيانات');
+        }catch (ModelNotFoundException $e){
+            Log::error($e->getMessage());
+            throw new Exception('الموديل غير موجودة');
+        } catch (RelationNotFoundException $e){
+            Log::error($e->getMessage());
+            throw new Exception('خطأ في عملية التحقق من الرابط');
+        }
+    }
+    /**
+     * reassigned Task to a User
+     *
+     * @param  Task  $task
+     * @param  [type]  $Data
+     * @return Task
+     */
+    public function reassignTask(Task $task , $Data):Task
+    {
+        try {
+            $task->update(['assigned_to' => $Data->assigned_to]);
+            return $task;
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            throw new Exception('حدث خطأ أثناء محاولة تحديث البيانات');
+        }catch (ModelNotFoundException $e){
+            Log::error($e->getMessage());
+            throw new Exception('الموديل غير موجودة');
+        } catch (RelationNotFoundException $e){
+            Log::error($e->getMessage());
+            throw new Exception('خطأ في عملية التحقق من الرابط');
+        }
+    }
+
+    /**
+     * assign Task to a User
+     *
+     * @param  Task  $task
+     * @param  [type]  $Data
+     * @return Task
+     */
+    public function assignTask(Task $task , $Data):Task
+    {
+        try {
+            $task->update(['assigned_to' => $Data->assigned_to]);
+            return $task;
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            throw new Exception('حدث خطأ أثناء محاولة تحديث البيانات');
+        }catch (ModelNotFoundException $e){
+            Log::error($e->getMessage());
+            throw new Exception('الموديل غير موجودة');
+        } catch (RelationNotFoundException $e){
+            Log::error($e->getMessage());
+            throw new Exception('خطأ في عملية التحقق من الرابط');
         }
     }
 }

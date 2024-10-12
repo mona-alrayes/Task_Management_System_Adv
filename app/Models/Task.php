@@ -43,6 +43,12 @@ class Task extends Model
         'due_date' => 'date',
     ];
 
+    public static function blockedTasks()
+    {
+        return self::where('status', 'blocked')->get();
+    }
+    
+
     /**
      * Get all comments for the model (Task, Post, etc.) using a polymorphic relationship.
      * 
