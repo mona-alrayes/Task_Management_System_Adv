@@ -13,7 +13,7 @@ class UpdateStatusRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false; // Change this to true if authorization is needed
+        return true; // Change this to true if authorization is needed
     }
 
     /**
@@ -24,7 +24,7 @@ class UpdateStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', 'string', 'in:in_progress,completed'],
+            'status' => ['required', 'string', 'in:In_progress,Completed'],
         ];
     }
 
@@ -36,9 +36,9 @@ class UpdateStatusRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'required' => 'حقل :attributes مطلوب',
-            'string' => 'يجب ان يكون نصا :attributes حقل ',
-            'in' => 'حقل :attributes يجب ان يكون واحد مما يلي in_progress , completed ',
+            'required' => 'حقل :attribute مطلوب',
+            'string' => 'يجب أن يكون حقل :attribute نصاً',
+            'in' => 'حقل :attribute يجب أن يكون واحداً مما يلي: In_progress, Completed',
         ];
     }
 

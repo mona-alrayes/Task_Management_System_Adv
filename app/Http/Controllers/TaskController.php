@@ -58,18 +58,17 @@ class TaskController extends Controller
         $updatedTask = $this->TaskService->updateTask($task, $request->validated());
         return self::success($updatedTask, 'Task updated successfully');
     }
+    #TODO go back here for error handling
     /**
-     * Updating the status of the task
-     *
-     * @param  UpdateStatusRequest  $request
-     * @param  Task  $task
-     * @return JsonResponse
+     * Update the status of the specified resource in storage.
+     * @throws \Exception
      */
-    public function statusChange(UpdateStatusRequest $request, Task $task): JsonResponse
+    public function statusChange(UpdateStatusRequest $request, Task $task)
     {
-        $updateStatus = $this->TaskService->updateTask($task, $request->validated());
-        return self::success($updateStatus, 'Task status Updated successfully');
+        // Call the service to update status and return its response
+        return $this->TaskService->updateStatus($task, $request->validated());
     }
+    
     /**
      * reassignTask PUT Method
      *
@@ -77,21 +76,21 @@ class TaskController extends Controller
      * @param  Task  $task
      * @return void
      */
-    public function reassignTask(assignedToRequest $request, string $id){
-        $reassignedTask = $this->TaskService->reassignTask($id , $request->validated());
+    public function reassignTask(assignedToRequest $request, Task $task){
+        $reassignedTask = $this->TaskService->reassignTask($task , $request->validated());
         return self::success($reassignedTask, 'Task reassigned successfully');
     }
     /**
      * assignTask Post Method
      *
      * @param  assignedToRequest  $request
-     * @param  string $id Task
+     * @param  Task $task
      * @return void
      */
-    public function assignTask(assignedToRequest $request , string $id){
-       $assignedTask = $this->TaskService->assignTask($id , $request->validated());
-       return self::success($assignedTask , 'Task been assgined To User Sucessfully');
-    }
+    public function assignTask(assignedToRequest $request , Task $task){
+        $assignedTask = $this->TaskService->assignTask($task , $request->validated());
+        return self::success($assignedTask , 'Task been assgined To User Sucessfully');
+     }
 
     /**
      * show tasks that has status = blocked
