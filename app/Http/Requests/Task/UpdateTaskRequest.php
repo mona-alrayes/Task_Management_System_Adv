@@ -32,6 +32,7 @@ class UpdateTaskRequest extends FormRequest
             'priority' => ['sometimes', 'string', 'in:Low,Medium,High'],
             'due_date' => ['sometimes', 'date_format:d-m-Y'],
             'assigned_to' => ['nullable', 'exists:users,id'],
+            'depends_on' => ['nullable','integer','exists:tasks,id'], 
         ];
     }
 
@@ -53,6 +54,7 @@ class UpdateTaskRequest extends FormRequest
             'priority.in' => 'أولوية الحقل :attribute يجب أن تكون إما منخفضة، متوسطة، أو عالية.',
             'due_date.date_format' => 'الحقل :attribute يجب أن يكون بتنسيق يوم-شهر-سنة.',
             'assigned_to.exists' => 'المستخدم المحدد في الحقل :attribute غير موجود.',
+            'depends_on.exists' => 'الحقل :attribute غير موجود في جدول المهام'
         ];
     }
 
@@ -72,6 +74,7 @@ class UpdateTaskRequest extends FormRequest
             'due_date' => 'التاريخ التسليم',
             'status' => 'حالة التاسك',
             'assigned_to' => 'المعين للعمل',
+            'depends_on' => 'معرف الاعتمادية',
         ];
     }
 

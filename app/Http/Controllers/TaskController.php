@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Task\assignedToRequest;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Services\Task\TaskService;
+use Illuminate\Support\Facades\Cache;
 use App\Http\Requests\Task\StoreTaskRequest;
-use App\Http\Requests\Task\UpdateStatusRequest;
+use App\Http\Requests\Task\assignedToRequest;
 use App\Http\Requests\Task\UpdateTaskRequest;
+use App\Http\Requests\Task\UpdateStatusRequest;
 
 class TaskController extends Controller
 {
@@ -46,7 +47,10 @@ class TaskController extends Controller
      */
     public function show(Task $task): JsonResponse
     {
-        return self::success($task, 'Task retrieved successfully');
+        $taskData = Cache::remember('task_'.$task->id, 3600, function () use ($task) {
+            return $task; 
+        });
+        return self::success($taskData->load('comments'), 'Task retrieved successfully');
     }
 
     /**
@@ -113,6 +117,8 @@ class TaskController extends Controller
     public function destroy(Task $task): JsonResponse
     {
         $task->delete();
+        Cache::forget('tasks');
+        Cache::forget('task_' . $task->id);
         return self::success(null, 'Task deleted successfully');
     }
 
@@ -137,6 +143,8 @@ class TaskController extends Controller
     {
         $task = Task::onlyTrashed()->findOrFail($id);
         $task->restore();
+        Cache::forget('tasks');
+        Cache::forget('task_' . $task->id);
         return self::success($task, 'Task restored successfully');
     }
 
@@ -148,6 +156,8 @@ class TaskController extends Controller
     public function forceDeleted(string $id): JsonResponse
     {
         $task = Task::onlyTrashed()->findOrFail($id)->forceDelete();
+        Cache::forget('tasks');
+        Cache::forget('task_' . $task->id);
         return self::success(null, 'Task force deleted successfully');
     }
 

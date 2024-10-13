@@ -74,4 +74,15 @@ class Task extends Model
     public function user(){
         return $this->belongsTo(User::class,'assigned_to');
     }
+
+    //The tasks that this task depends on.
+    public function dependencies()
+    {
+        return $this->belongsToMany(Task::class, 'task_dependencies', 'task_id', 'depends_on_task_id');
+    }
+    //The tasks that are waiting on this task.
+    public function dependentTasks()
+    {
+        return $this->belongsToMany(Task::class, 'task_dependencies', 'depends_on_task_id', 'task_id');
+    }
 }

@@ -15,15 +15,15 @@ class TaskService
     public function getTasks($request): LengthAwarePaginator
     {
         try {
-            $tasks=Cache::remember('tasks', 3600, function ($request) {
-                Task::query()
-                ->when($request->type, fn($q) => $q->where('type', $request->type))
-                ->when($request->status, fn($q) => $q->where('status', $request->status))
-                ->when($request->assigned_to, fn($q) => $q->where('assigned_to', $request->assigned_to))
-                ->when($request->due_date, fn($q) => $q->whereDate('due_date', $request->due_date))
-                ->when($request->priority, fn($q) => $q->where('priority', $request->priority))
-                ->with('comments')
-                ->paginate(10);
+            $tasks = Cache::remember('tasks', 3600, function () use ($request) {
+                return Task::query()
+                    ->when($request->type, fn($q) => $q->where('type', $request->type))
+                    ->when($request->status, fn($q) => $q->where('status', $request->status))
+                    ->when($request->assigned_to, fn($q) => $q->where('assigned_to', $request->assigned_to))
+                    ->when($request->due_date, fn($q) => $q->whereDate('due_date', $request->due_date))
+                    ->when($request->priority, fn($q) => $q->where('priority', $request->priority))
+                    ->with('comments')
+                    ->paginate(10);
             });
             return $tasks;
         } catch (Exception $exception) {
@@ -32,23 +32,51 @@ class TaskService
         }
     }
 
-    public function storeTask($Data): Task
+    public function storeTask(array $Data): Task
     {
         try {
-            $task = Task::create($Data);
-            cache::forget('task');
+            $task = Task::create([
+                'title' => $Data['title'],
+                'description' => $Data['description'],
+                'type' => $Data['type'],
+                'priority' => $Data['priority'],
+                'due_date' => $Data['due_date'],
+                'assigned_to' => $Data['assigned_to'],
+            ]);
+
+            // If there are dependencies, sync them
+            if (isset($Data['depends_on'])) {
+                $task->dependencies()->sync($Data['depends_on']);
+                $task->status = 'blocked';
+                $task->save();
+            }
+            // Clear cached tasks
+            Cache::forget('tasks');
+
             return $task;
         } catch (Exception $exception) {
             Log::error("Error storing task. Error: " . $exception->getMessage());
-            throw new Exception('حدث خطأ أثناء محاولة تخزين البيانات');
+            throw new Exception('حدث خطأ أثناء محاولة تخزين البيانات'); 
         }
     }
 
-    public function updateTask(Task $task, $Data): Task
+
+    public function updateTask(Task $task, array $Data): Task
     {
         try {
+            // Update the task, filter out any null or empty values using array_filter
             $task->update(array_filter($Data));
-            cache::forget('task');
+
+            // Check if dependencies are provided, and sync them
+            if (isset($Data['depends_on'])) {
+                $task->dependencies()->sync($Data['depends_on']);
+                $task->status = 'blocked';
+                $task->save();
+            }
+
+            // Clear cache for tasks
+            Cache::forget('tasks');
+
             return $task;
         } catch (ModelNotFoundException $e) {
             Log::error("Task not found. Error: " . $e->getMessage());
@@ -61,23 +89,46 @@ class TaskService
             throw new Exception('حدث خطأ أثناء محاولة تحديث البيانات');
         }
     }
+
     #TODO go back here for error handling
     public function updateStatus(Task $task, array $data)
     {
         try {
+            // Check if the task has any dependencies that are not completed
+            if ($task->dependencies()->where('status', '!=', 'Completed')->exists()) {
+                return response()->json([
+                    'message' => 'لا يمكن تغيير حالة المهمة لأن بعض المهام المعتمدة عليها لم تكتمل بعد.',
+                ], 400);
+            }
+
+            // If task has no incomplete dependencies, proceed with the status update
             $task->update(['status' => $data['status']]);
-            cache::forget('task');
+
+            // If the status is being changed to 'completed'
+            if ($data['status'] === 'Completed') {
+                // Get all tasks that depend on this task and have status 'blocked'
+                $dependentTasks = $task->dependentTasks()->where('status', 'blocked')->get();
+
+                // Update their status to 'open'
+                foreach ($dependentTasks as $dependentTask) {
+                    $dependentTask->update(['status' => 'open']);
+
+                    // Optionally delete the record from the pivot table
+                    $task->dependentTasks()->detach($dependentTask->id);
+                }
+            }
+            // Clear cache
+            Cache::forget('tasks');
+
             return response()->json([
-                'message' => 'Task status updated successfully.',
+                'message' => 'تم تحديث حالة المهمة بنجاح.',
                 'task' => $task
             ], 200);
         } catch (ModelNotFoundException $e) {
-            // Return clean JSON response for task not found
             return response()->json([
                 'message' => 'لم يتم العثور على المهمة.',
             ], 404);
         } catch (Exception $e) {
-            // Log and handle other exceptions
             Log::error("Error updating task: " . $e->getMessage());
 
             return response()->json([
@@ -87,11 +138,12 @@ class TaskService
     }
 
 
+
     public function reassignTask(Task $task, $Data): Task
     {
         try {
             $task->update(['assigned_to' => $Data['assigned_to']]);
-            cache::forget('task');
+            cache::forget('tasks');
             return $task;
         } catch (ModelNotFoundException $e) {
             Log::error("Task not found for reassignment. Error: " . $e->getMessage());
@@ -106,7 +158,7 @@ class TaskService
     {
         try {
             $task->update(['assigned_to' => $Data['assigned_to']]);
-            cache::forget('task');
+            cache::forget('tasks');
             return $task;
         } catch (ModelNotFoundException $e) {
             Log::error("Task not found for assignment. Error: " . $e->getMessage());
