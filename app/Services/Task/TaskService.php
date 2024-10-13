@@ -4,17 +4,19 @@ namespace App\Services\Task;
 
 use Exception;
 use App\Models\Task;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\RelationNotFoundException;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class TaskService
 {
     public function getTasks($request): LengthAwarePaginator
     {
         try {
-            $tasks = Task::query()
+            $tasks=Cache::remember('tasks', 3600, function ($request) {
+                Task::query()
                 ->when($request->type, fn($q) => $q->where('type', $request->type))
                 ->when($request->status, fn($q) => $q->where('status', $request->status))
                 ->when($request->assigned_to, fn($q) => $q->where('assigned_to', $request->assigned_to))
@@ -22,7 +24,7 @@ class TaskService
                 ->when($request->priority, fn($q) => $q->where('priority', $request->priority))
                 ->with('comments')
                 ->paginate(10);
-
+            });
             return $tasks;
         } catch (Exception $exception) {
             Log::error("Error fetching tasks. Error: " . $exception->getMessage());
@@ -33,7 +35,9 @@ class TaskService
     public function storeTask($Data): Task
     {
         try {
-            return Task::create($Data);
+            $task = Task::create($Data);
+            cache::forget('task');
+            return $task;
         } catch (Exception $exception) {
             Log::error("Error storing task. Error: " . $exception->getMessage());
             throw new Exception('حدث خطأ أثناء محاولة تخزين البيانات');
@@ -44,6 +48,7 @@ class TaskService
     {
         try {
             $task->update(array_filter($Data));
+            cache::forget('task');
             return $task;
         } catch (ModelNotFoundException $e) {
             Log::error("Task not found. Error: " . $e->getMessage());
@@ -60,9 +65,8 @@ class TaskService
     public function updateStatus(Task $task, array $data)
     {
         try {
-            
             $task->update(['status' => $data['status']]);
-
+            cache::forget('task');
             return response()->json([
                 'message' => 'Task status updated successfully.',
                 'task' => $task
@@ -87,6 +91,7 @@ class TaskService
     {
         try {
             $task->update(['assigned_to' => $Data['assigned_to']]);
+            cache::forget('task');
             return $task;
         } catch (ModelNotFoundException $e) {
             Log::error("Task not found for reassignment. Error: " . $e->getMessage());
@@ -101,6 +106,7 @@ class TaskService
     {
         try {
             $task->update(['assigned_to' => $Data['assigned_to']]);
+            cache::forget('task');
             return $task;
         } catch (ModelNotFoundException $e) {
             Log::error("Task not found for assignment. Error: " . $e->getMessage());

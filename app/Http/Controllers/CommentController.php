@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Task;
+use App\Models\Comment;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use App\Services\Comment\CommentService;
 use App\Http\Requests\Comment\StoreCommentRequest;
 use App\Http\Requests\Comment\UpdateCommentRequest;
-use App\Models\Comment;
-use App\Services\CommentService;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
@@ -23,26 +24,27 @@ class CommentController extends Controller
      * Display a listing of the resource.
      * @throws \Exception
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request)
     {
-        ${{ modelVariablePlural }} = $this->CommentService->getComments($request);
-        return self::paginated(${{ modelVariablePlural }}, 'Comments retrieved successfully', 200);
+        //
     }
 
     /**
      * Store a newly created resource in storage.
      * @throws \Exception
      */
-    public function store(StoreCommentRequest $request): JsonResponse
+
+    public function store(StoreCommentRequest $request, Task $task): JsonResponse
     {
-        $comment = $this->CommentService->storeComment($request->validated());
+        $comment = $this->CommentService->storeComment($request->validated(), $task);
         return self::success($comment, 'Comment created successfully', 201);
     }
+
 
     /**
      * Display the specified resource.
      */
-    public function show(Comment $comment): JsonResponse
+    public function show(Comment $comment, string $task_id): JsonResponse
     {
         return self::success($comment, 'Comment retrieved successfully');
     }
@@ -51,9 +53,9 @@ class CommentController extends Controller
      * Update the specified resource in storage.
      * @throws \Exception
      */
-    public function update(UpdateCommentRequest $request, Comment $comment): JsonResponse
+    public function update(UpdateCommentRequest $request, Comment $comment, string $task_id): JsonResponse
     {
-        $updatedComment = $this->CommentService->updateComment($comment, $request->validated());
+        $updatedComment = $this->CommentService->updateComment($comment, $request->validated(), $task_id);
         return self::success($updatedComment, 'Comment updated successfully');
     }
 
@@ -71,8 +73,8 @@ class CommentController extends Controller
      */
     public function showDeleted(): JsonResponse
     {
-        ${{ modelVariablePlural }} = Comment::onlyTrashed()->get();
-        return self::success(${{ modelVariablePlural }}, 'Comments retrieved successfully');
+        $comment = Comment::onlyTrashed()->get();
+        return self::success($comment, 'Comments retrieved successfully');
     }
 
     /**

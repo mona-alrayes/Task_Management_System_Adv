@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('comments', function (Blueprint $table) {
             $table->id();
-            $table->string('comment');
+            $table->text('comment');
             $table->morphs('commentable'); // This creates commentable_type and commentable_id
             $table->softDeletes(); 
             $table->timestamps();
