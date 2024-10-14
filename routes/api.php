@@ -26,6 +26,7 @@ Route::controller(AuthController::class)->group(function () {
 Route::get('tasks/deleted', [TaskController::class , 'showDeleted']);
 Route::put('tasks/{id}/restore', [TaskController::class , 'restoreDeleted']);
 Route::delete('tasks/{id}/delete', [TaskController::class , 'forceDeleted']);
+Route::post('tasks/{task}/attachments', [TaskController::class, 'uploadAttachment']);
 Route::put('tasks/{task}/status', [TaskController::class , 'statusChange']);
 Route::get('tasks/blockedTasks', [TaskController::class , 'blockedTasks']);
 Route::post('tasks/{task}/assign' , [TaskController::class , 'assignTask']);

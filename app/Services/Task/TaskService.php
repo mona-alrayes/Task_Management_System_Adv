@@ -60,7 +60,6 @@ class TaskService
         }
     }
 
-
     public function updateTask(Task $task, array $Data): Task
     {
         try {

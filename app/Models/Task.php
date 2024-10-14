@@ -48,24 +48,6 @@ class Task extends Model
         return self::where('status', 'blocked')->get();
     }
     
-
-    /**
-     * Get all comments for the model (Task, Post, etc.) using a polymorphic relationship.
-     * 
-     * This method defines a one-to-many polymorphic relationship, allowing the model 
-     * to have multiple comments. The comments are stored in a shared `comments` table 
-     * and can be associated with various models (e.g., Task, Post) through the 
-     * `commentable_type` and `commentable_id` fields.
-     * 
-     * The `morphMany` method indicates that this model can have multiple comments, 
-     * and it retrieves all comments associated with this specific model instance.
-     * 
-     * Example usage:
-     * $task = Task::find(1);
-     * $comments = $task->comments;
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
-     */
     public function comments()
     {
         return $this->morphMany(Comment::class, 'commentable');
@@ -85,4 +67,10 @@ class Task extends Model
     {
         return $this->belongsToMany(Task::class, 'task_dependencies', 'depends_on_task_id', 'task_id');
     }
+
+     //the polymorphic relationship with attachments
+     public function attachments()
+     {
+         return $this->morphMany(Attachment::class, 'attachable');
+     }
 }

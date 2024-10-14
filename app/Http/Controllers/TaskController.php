@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Services\Task\TaskService;
 use Illuminate\Support\Facades\Cache;
+use App\Services\Assets\AssetsService;
 use App\Http\Requests\Task\StoreTaskRequest;
 use App\Http\Requests\Task\assignedToRequest;
 use App\Http\Requests\Task\UpdateTaskRequest;
@@ -16,10 +17,12 @@ class TaskController extends Controller
 {
 
     protected TaskService $TaskService;
+    protected AssetsService $assetsService; // Assuming AssetsService exists and implements the storeAttachment method
 
-    public function __construct(TaskService $TaskService)
+    public function __construct(TaskService $TaskService , AssetsService $assetsService)
     {
         $this->TaskService = $TaskService;
+        $this->assetsService = $assetsService;
     }
 
     /**
@@ -42,13 +45,30 @@ class TaskController extends Controller
         return self::success($task, 'Task created successfully', 201);
     }
 
+   /**
+    * store files in the disk and database
+    *
+    * @param  Request  $request
+    * @param  Task  $task
+    * @return void
+    */
+    public function uploadAttachment(Request $request, Task $task)
+    {
+        $request->validate([
+            'file' => 'required|file|max:2048', 
+        ]);
+        $file = $request->file('file');
+        $attachment = $this->assetsService->storeAttachment($file, Task::class, $task->id);
+        return self::success($attachment, 'File uploaded successfully' , 201);
+    }
+
     /**
      * Display the specified resource.
      */
     public function show(Task $task): JsonResponse
     {
-        $taskData = Cache::remember('task_'.$task->id, 3600, function () use ($task) {
-            return $task; 
+        $taskData = Cache::remember('task_' . $task->id, 3600, function () use ($task) {
+            return $task;
         });
         return self::success($taskData->load('comments'), 'Task retrieved successfully');
     }
@@ -72,7 +92,7 @@ class TaskController extends Controller
         // Call the service to update status and return its response
         return $this->TaskService->updateStatus($task, $request->validated());
     }
-    
+
     /**
      * reassignTask PUT Method
      *
@@ -80,8 +100,9 @@ class TaskController extends Controller
      * @param  Task  $task
      * @return void
      */
-    public function reassignTask(assignedToRequest $request, Task $task){
-        $reassignedTask = $this->TaskService->reassignTask($task , $request->validated());
+    public function reassignTask(assignedToRequest $request, Task $task)
+    {
+        $reassignedTask = $this->TaskService->reassignTask($task, $request->validated());
         return self::success($reassignedTask, 'Task reassigned successfully');
     }
     /**
@@ -91,10 +112,11 @@ class TaskController extends Controller
      * @param  Task $task
      * @return void
      */
-    public function assignTask(assignedToRequest $request , Task $task){
-        $assignedTask = $this->TaskService->assignTask($task , $request->validated());
-        return self::success($assignedTask , 'Task been assgined To User Sucessfully');
-     }
+    public function assignTask(assignedToRequest $request, Task $task)
+    {
+        $assignedTask = $this->TaskService->assignTask($task, $request->validated());
+        return self::success($assignedTask, 'Task been assgined To User Sucessfully');
+    }
 
     /**
      * show tasks that has status = blocked
@@ -103,14 +125,13 @@ class TaskController extends Controller
      * @return void
      */
 
-    public function blockedTasks(Request $request){
+    public function blockedTasks(Request $request)
+    {
         $blockedTasks = Task::blockedTasks();
         return self::success($blockedTasks, 'Blocked tasks retrieved successfully');
     }
-    
-    public function addAttachment(Request $request , Task $task){
 
-    }
+    public function addAttachment(Request $request, Task $task) {}
     /**
      * Remove the specified resource from storage.
      */
@@ -128,8 +149,8 @@ class TaskController extends Controller
     public function showDeleted(): JsonResponse
     {
         $softdeleted = Task::onlyTrashed()->get();
-        if(!$softdeleted){
-            return self::error(null,'no soft-deleted tasks found', 404);
+        if (!$softdeleted) {
+            return self::error(null, 'no soft-deleted tasks found', 404);
         }
         return self::success($softdeleted, 'Deleted Tasks retrieved successfully');
     }
@@ -160,6 +181,4 @@ class TaskController extends Controller
         Cache::forget('task_' . $task->id);
         return self::success(null, 'Task force deleted successfully');
     }
-
-
 }
