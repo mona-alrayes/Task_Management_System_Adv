@@ -73,4 +73,34 @@ class Task extends Model
      {
          return $this->morphMany(Attachment::class, 'attachable');
      }
+
+     protected static function booted()
+    {
+        static::updating(function ($task) {
+            if ($task->isDirty('status')) {
+                // Log the status update in the task_status_updates table
+                TaskStatusUpdate::create([
+                    'task_id' => $task->id,
+                    'old_status' => $task->getOriginal('status'),
+                    'new_status' => $task->status,
+                    'changed_at' => now(),
+                ]);
+            }
+        });
+        
+        static::updating(function ($task) {
+            $changes = $task->getDirty();
+
+            foreach ($changes as $field => $newValue) {
+                TaskLog::create([
+                    'task_id' => $task->id,
+                    'field_changed' => $field,
+                    'old_value' => $task->getOriginal($field),
+                    'new_value' => $newValue,
+                    'changed_at' => now(),
+                ]);
+            }
+        });
+    }
+   
 }

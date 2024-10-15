@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\Auth\AuthController;
 
@@ -33,4 +34,6 @@ Route::post('tasks/{task}/assign' , [TaskController::class , 'assignTask']);
 Route::put('tasks/{task}/reassign', [TaskController::class , 'reassignTask']);
 Route::post('/tasks/{task}/comments', [CommentController::class, 'store']);
 Route::apiResource('tasks', TaskController::class);
+Route::get('/reports/daily-tasks', [ReportController::class, 'dailyTaskReport']);
+
 
