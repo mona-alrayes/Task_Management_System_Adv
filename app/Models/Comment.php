@@ -23,12 +23,8 @@ class Comment extends Model
     /**
      * Get the parent model (task or any other model) that this comment belongs to.
      * 
-     * This method refers to the polymorphic relationship, allowing a comment 
-     * to be associated with more than one type of model (e.g., Task, Post, etc.).
-     * 
-     * In a polymorphic relationship, the `comments` table contains two columns:
-     * `commentable_id` (the ID of the related model) and `commentable_type` 
-     * (the class name of the related model, such as `App\Models\Task`).
+     * This defines a polymorphic relationship, allowing the comment to be associated 
+     * with different models (e.g., Task) using `commentable_id` and `commentable_type`.
      * 
      * @return \Illuminate\Database\Eloquent\Relations\MorphTo
      */
