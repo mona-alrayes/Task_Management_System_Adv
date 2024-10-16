@@ -22,6 +22,4 @@ class TaskLog extends Model
         'new_value',
         'changed_at',
     ];
-
-    
 }

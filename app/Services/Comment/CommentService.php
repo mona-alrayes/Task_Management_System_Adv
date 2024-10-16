@@ -29,12 +29,6 @@ class CommentService
         try {
             $comment->update(array_filter($Data));
             return $comment;
-        } catch (ModelNotFoundException $e) {
-            Log::error("Comment not found. Error: " . $e->getMessage());
-            throw new Exception('الموديل غير موجودة');
-        } catch (RelationNotFoundException $e) {
-            Log::error("Relation not found. Error: " . $e->getMessage());
-            throw new Exception('خطأ في عملية التحقق من الرابط');
         } catch (Exception $exception) {
             Log::error("Error updating comment. Error: " . $exception->getMessage());
             throw new Exception('حدث خطأ أثناء محاولة تحديث البيانات');

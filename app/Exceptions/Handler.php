@@ -13,6 +13,33 @@ use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 
 class Handler extends ExceptionHandler
 {
+
+    /**
+     * Render an exception into an HTTP response.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Throwable  $exception
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function render($request, Throwable $exception)
+    {
+        // Check if the exception is an instance of ModelNotFoundException
+        if ($exception instanceof ModelNotFoundException) {
+            Log::error("Model not found. Error: " . $exception->getMessage());
+            return response()->json(['message'=>'الموديل غير موجود'], 404);
+        }
+        if($exception instanceof RelationNotFoundException) {
+            Log::error("Relation not found. Error: " . $exception->getMessage());
+            return response()->json(['message'=>'العلاقة غير موجودة'], 404);
+        }
+        if($exception instanceof Exception) {
+            Log::error("Error Happened : " . $exception->getMessage());
+            return response()->json(['message'=>'حدث خطأ في المخدم'], 500);
+        }
+
+        // For other exceptions, call the parent render method
+         return parent::render($request, $exception);
+    }
     /**
      * The list of the inputs that are never flashed to the session on validation exceptions.
      *
@@ -36,14 +63,6 @@ class Handler extends ExceptionHandler
 
     public function report(Throwable $exception)
     {
-        // Log specific exceptions
-        // if (
-        //     $exception instanceof ModelNotFoundException ||
-        //     $exception instanceof NotFoundHttpException ||
-        //     $exception instanceof RelationNotFoundException ||
-        //     $exception instanceof Throwable
-        // ) {
-
             try {
                 ErrorLog::create([
                     'exception_type' => get_class($exception),
@@ -58,9 +77,6 @@ class Handler extends ExceptionHandler
             } catch (Exception $e) {
                 Log::error('Failed to log exception: ' . $e->getMessage());
             }
-        // }
-
-        // Continue with normal exception reporting
         parent::report($exception);
      }
 }

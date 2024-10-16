@@ -20,5 +20,4 @@ class TaskStatusUpdate extends Model
         'new_status',
         'changed_at',
     ];
-    
 }
