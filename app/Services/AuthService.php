@@ -33,7 +33,7 @@ class AuthService
             if (!$token) {
                 // Return consistent response structure on failure
                 return [
-                    'status' => 'error',
+                    'status' => 'خطأ',
                     'message' => 'غير مخول', // Unauthorized
                 ];
             }
@@ -50,7 +50,7 @@ class AuthService
             Log::error(['error' => $e->getMessage()]);
     
             return [
-                'status' => 'error',
+                'status' => 'خطأ',
                 'message' => 'حدث خطأ اثناء عملية الدخول.', // Error during login
             ];
         }
