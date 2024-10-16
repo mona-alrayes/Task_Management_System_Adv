@@ -10,10 +10,10 @@ class ErrorLogController extends Controller
 {
     public function index()
     {
-        // Retrieve all error logs, you can paginate if needed
+        // Retrieve all error logs
         $errorLogs = ErrorLog::orderBy('created_at', 'desc')->paginate(10);
 
-        // Return the error logs as JSON response 
+        // Return the error logs paginated
         return self::paginated($errorLogs , 'errors retrevied successfully', 200);
     }
 }
