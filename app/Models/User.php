@@ -1,8 +1,6 @@
 <?php
-
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
@@ -13,7 +11,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasApiTokens, HasFactory, Notifiable , SoftDeletes , HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -44,7 +42,7 @@ class User extends Authenticatable implements JWTSubject
     ];
 
     /**
-     * The attributes that should be cast.
+     * The attributes that should be cast to native types.
      *
      * @var array<string, string>
      */
@@ -53,8 +51,10 @@ class User extends Authenticatable implements JWTSubject
         'password' => 'hashed',
     ];
 
-     /**
+    /**
      * Get the identifier that will be stored in the subject claim of the JWT.
+     * 
+     * This method is required by the JWTAuth package to uniquely identify the user.
      *
      * @return mixed
      */
@@ -64,7 +64,7 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Return a key value array, containing any custom claims to be added to the JWT.
+     * Return a key-value array containing any custom claims to be added to the JWT.
      *
      * @return array
      */
@@ -74,12 +74,12 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * 
+     * Get all tasks assigned to the user.
      *
-     * @return void
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function tasks(){
-
-        return $this->hasMany(Task::class , 'assigned_to');
+    public function tasks()
+    {
+        return $this->hasMany(Task::class, 'assigned_to');
     }
 }
