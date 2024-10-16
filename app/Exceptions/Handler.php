@@ -26,20 +26,21 @@ class Handler extends ExceptionHandler
         // Check if the exception is an instance of ModelNotFoundException
         if ($exception instanceof ModelNotFoundException) {
             Log::error("Model not found. Error: " . $exception->getMessage());
-            return response()->json(['message'=>'الموديل غير موجود'], 404);
+            return response()->json(['message' => 'الموديل غير موجود'], 404);
         }
-        if($exception instanceof RelationNotFoundException) {
+        if ($exception instanceof RelationNotFoundException) {
             Log::error("Relation not found. Error: " . $exception->getMessage());
-            return response()->json(['message'=>'العلاقة غير موجودة'], 404);
+            return response()->json(['message' => 'العلاقة غير موجودة'], 404);
         }
-        if($exception instanceof Exception) {
+        if ($exception instanceof Exception) {
             Log::error("Error Happened : " . $exception->getMessage());
-            return response()->json(['message'=>'حدث خطأ في المخدم'], 500);
+            return response()->json(['message' => 'حدث خطأ في المخدم'], 500);
         }
 
         // For other exceptions, call the parent render method
-         return parent::render($request, $exception);
+        return parent::render($request, $exception);
     }
+
     /**
      * The list of the inputs that are never flashed to the session on validation exceptions.
      *
@@ -61,22 +62,32 @@ class Handler extends ExceptionHandler
         });
     }
 
+    /**
+     * Log an exception by creating an error record in the database.
+     *
+     * This method captures details of the given exception, including its type, 
+     * message, stack trace, file, line number, request URL, HTTP method, and input data.
+     * If logging fails, an error message is recorded in the application's log.
+     *
+     * @param  Throwable  $exception The exception to report.
+     * @return void
+     */
     public function report(Throwable $exception)
     {
-            try {
-                ErrorLog::create([
-                    'exception_type' => get_class($exception),
-                    'message' => $exception->getMessage(),
-                    'trace' => $exception->getTraceAsString(),
-                    'file' => $exception->getFile(),
-                    'line' => $exception->getLine(),
-                    'url' => request()->fullUrl(),
-                    'method' => request()->method(),
-                    'input' => json_encode(request()->all()),
-                ]);
-            } catch (Exception $e) {
-                Log::error('Failed to log exception: ' . $e->getMessage());
-            }
+        try {
+            ErrorLog::create([
+                'exception_type' => get_class($exception),
+                'message' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString(),
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'url' => request()->fullUrl(),
+                'method' => request()->method(),
+                'input' => json_encode(request()->all()),
+            ]);
+        } catch (Exception $e) {
+            Log::error('Failed to log exception: ' . $e->getMessage());
+        }
         parent::report($exception);
-     }
+    }
 }
