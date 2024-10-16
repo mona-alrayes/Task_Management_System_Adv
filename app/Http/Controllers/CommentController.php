@@ -12,37 +12,45 @@ use App\Http\Requests\Comment\UpdateCommentRequest;
 
 class CommentController extends Controller
 {
+    protected CommentService $commentService;
 
-    protected CommentService $CommentService;
-
-    public function __construct(CommentService $CommentService)
+    public function __construct(CommentService $commentService)
     {
-        $this->CommentService = $CommentService;
+        $this->commentService = $commentService;
     }
 
     /**
-     * Display a listing of the resource.
+     * Display a listing of the comments.
+     *
+     * @param Request $request
+     * @return JsonResponse
      * @throws \Exception
      */
     public function index(Request $request)
     {
-        //
+        // Implementation will go here
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created comment in storage.
+     *
+     * @param StoreCommentRequest $request
+     * @param Task $task
+     * @return JsonResponse
      * @throws \Exception
      */
-
     public function store(StoreCommentRequest $request, Task $task): JsonResponse
     {
-        $comment = $this->CommentService->storeComment($request->validated(), $task);
+        $comment = $this->commentService->storeComment($request->validated(), $task);
         return self::success($comment, 'Comment created successfully', 201);
     }
 
-
     /**
-     * Display the specified resource.
+     * Display the specified comment.
+     *
+     * @param Comment $comment
+     * @param string $task_id
+     * @return JsonResponse
      */
     public function show(Comment $comment, string $task_id): JsonResponse
     {
@@ -50,17 +58,25 @@ class CommentController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified comment in storage.
+     *
+     * @param UpdateCommentRequest $request
+     * @param Comment $comment
+     * @param string $task_id
+     * @return JsonResponse
      * @throws \Exception
      */
     public function update(UpdateCommentRequest $request, Comment $comment, string $task_id): JsonResponse
     {
-        $updatedComment = $this->CommentService->updateComment($comment, $request->validated(), $task_id);
+        $updatedComment = $this->commentService->updateComment($comment, $request->validated(), $task_id);
         return self::success($updatedComment, 'Comment updated successfully');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified comment from storage.
+     *
+     * @param Comment $comment
+     * @return JsonResponse
      */
     public function destroy(Comment $comment): JsonResponse
     {
@@ -69,16 +85,19 @@ class CommentController extends Controller
     }
 
     /**
-     * Display soft-deleted records.
+     * Display soft-deleted comments.
+     *
+     * @return JsonResponse
      */
     public function showDeleted(): JsonResponse
     {
-        $comment = Comment::onlyTrashed()->get();
-        return self::success($comment, 'Comments retrieved successfully');
+        $comments = Comment::onlyTrashed()->get();
+        return self::success($comments, 'Comments retrieved successfully');
     }
 
     /**
-     * Restore a soft-deleted record.
+     * Restore a soft-deleted comment.
+     *
      * @param string $id
      * @return JsonResponse
      */
@@ -90,13 +109,14 @@ class CommentController extends Controller
     }
 
     /**
-     * Permanently delete a soft-deleted record.
+     * Permanently delete a soft-deleted comment.
+     *
      * @param string $id
      * @return JsonResponse
      */
     public function forceDeleted(string $id): JsonResponse
     {
-        $comment = Comment::onlyTrashed()->findOrFail($id)->forceDelete();
+        Comment::onlyTrashed()->findOrFail($id)->forceDelete();
         return self::success(null, 'Comment force deleted successfully');
     }
 }
