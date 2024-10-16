@@ -19,144 +19,143 @@ class TaskController extends Controller
     protected TaskService $TaskService;
     protected AssetsService $assetsService; // Assuming AssetsService exists and implements the storeAttachment method
 
-    public function __construct(TaskService $TaskService , AssetsService $assetsService)
+    public function __construct(TaskService $TaskService, AssetsService $assetsService)
     {
         $this->TaskService = $TaskService;
         $this->assetsService = $assetsService;
     }
 
     /**
-     * Display a listing of the resource.
+     * عرض قائمة المهام.
      * @throws \Exception
      */
     public function index(Request $request): JsonResponse
     {
         $tasks = $this->TaskService->getTasks($request);
-        return self::paginated($tasks, 'Tasks retrieved successfully', 200);
+        return self::paginated($tasks, 'تم استرجاع المهام بنجاح', 200);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * تخزين مهمة جديدة.
      * @throws \Exception
      */
     public function store(StoreTaskRequest $request): JsonResponse
     {
         $task = $this->TaskService->storeTask($request->validated());
-        return self::success($task, 'Task created successfully', 201);
-    }
-
-   /**
-    * store files in the disk and database
-    *
-    * @param  Request  $request
-    * @param  Task  $task
-    * @return void
-    */
-    public function uploadAttachment(Request $request, Task $task)
-    {
-        $request->validate([
-            'file' => 'required|file|max:2048', 
-        ]);
-        $file = $request->file('file');
-        $attachment = $this->assetsService->storeAttachment($file, Task::class, $task->id);
-        return self::success($attachment, 'File uploaded successfully' , 201);
+        return self::success($task, 'تم إنشاء المهمة بنجاح', 201);
     }
 
     /**
-     * Display the specified resource.
+     * تخزين الملفات في القرص وقاعدة البيانات.
+     *
+     * @param  Request  $request
+     * @param  Task  $task
+     * @return JsonResponse
+     */
+    public function uploadAttachment(Request $request, Task $task): JsonResponse
+    {
+        $request->validate([
+            'file' => 'required|file|max:2048',
+        ]);
+        $file = $request->file('file');
+        $attachment = $this->assetsService->storeAttachment($file, Task::class, $task->id);
+        return self::success($attachment, 'تم رفع الملف بنجاح', 201);
+    }
+
+    /**
+     * عرض مهمة محددة.
      */
     public function show(Task $task): JsonResponse
     {
         $taskData = Cache::remember('task_' . $task->id, 3600, function () use ($task) {
             return $task;
         });
-        return self::success($taskData->load('comments'), 'Task retrieved successfully');
+        return self::success($taskData->load('comments'), 'تم استرجاع المهمة بنجاح');
     }
 
     /**
-     * Update the specified resource in storage.
+     * تحديث مهمة محددة.
      * @throws \Exception
      */
     public function update(UpdateTaskRequest $request, Task $task): JsonResponse
     {
         $updatedTask = $this->TaskService->updateTask($task, $request->validated());
-        return self::success($updatedTask, 'Task updated successfully');
+        return self::success($updatedTask, 'تم تحديث المهمة بنجاح');
     }
-    #TODO go back here for error handling
+
     /**
-     * Update the status of the specified resource in storage.
+     * تغيير حالة مهمة محددة.
      * @throws \Exception
      */
-    public function statusChange(UpdateStatusRequest $request, Task $task)
+    public function statusChange(UpdateStatusRequest $request, Task $task): JsonResponse
     {
-        // Call the service to update status and return its response
-        return $this->TaskService->updateStatus($task, $request->validated());
+        $updateStatusTask = $this->TaskService->updateStatus($task, $request->validated());
+        return self::success($updateStatusTask, 'تم تحديث حالة المهمة بنجاح');
     }
 
     /**
-     * reassignTask PUT Method
-     *
-     * @param  Request  $request
-     * @param  Task  $task
-     * @return void
-     */
-    public function reassignTask(assignedToRequest $request, Task $task)
-    {
-        $reassignedTask = $this->TaskService->reassignTask($task, $request->validated());
-        return self::success($reassignedTask, 'Task reassigned successfully');
-    }
-    /**
-     * assignTask Post Method
+     * إعادة تعيين مهمة لمستخدم آخر.
      *
      * @param  assignedToRequest  $request
-     * @param  Task $task
-     * @return void
+     * @param  Task  $task
+     * @return JsonResponse
      */
-    public function assignTask(assignedToRequest $request, Task $task)
+    public function reassignTask(assignedToRequest $request, Task $task): JsonResponse
+    {
+        $reassignedTask = $this->TaskService->reassignTask($task, $request->validated());
+        return self::success($reassignedTask, 'تم إعادة تعيين المهمة بنجاح');
+    }
+
+    /**
+     * تعيين مهمة لمستخدم.
+     *
+     * @param  assignedToRequest  $request
+     * @param  Task  $task
+     * @return JsonResponse
+     */
+    public function assignTask(assignedToRequest $request, Task $task): JsonResponse
     {
         $assignedTask = $this->TaskService->assignTask($task, $request->validated());
-        return self::success($assignedTask, 'Task been assgined To User Sucessfully');
+        return self::success($assignedTask, 'تم تعيين المهمة للمستخدم بنجاح');
     }
 
     /**
-     * show tasks that has status = blocked
+     * عرض المهام التي حالتها "محظورة".
      *
      * @param  Request  $request
-     * @return void
+     * @return JsonResponse
      */
-
-    public function blockedTasks(Request $request)
+    public function blockedTasks(Request $request): JsonResponse
     {
         $blockedTasks = Task::blockedTasks();
-        return self::success($blockedTasks, 'Blocked tasks retrieved successfully');
+        return self::success($blockedTasks, 'تم استرجاع المهام المحظورة بنجاح');
     }
 
-    public function addAttachment(Request $request, Task $task) {}
     /**
-     * Remove the specified resource from storage.
+     * إزالة مهمة محددة.
      */
     public function destroy(Task $task): JsonResponse
     {
         $task->delete();
         Cache::forget('tasks');
         Cache::forget('task_' . $task->id);
-        return self::success(null, 'Task deleted successfully');
+        return self::success(null, 'تم حذف المهمة بنجاح');
     }
 
     /**
-     * Display soft-deleted records.
+     * عرض المهام المحذوفة (soft-deleted).
      */
     public function showDeleted(): JsonResponse
     {
         $softdeleted = Task::onlyTrashed()->get();
-        if (!$softdeleted) {
-            return self::error(null, 'no soft-deleted tasks found', 404);
+        if ($softdeleted->isEmpty()) {
+            return self::error(null, 'لم يتم العثور على مهام محذوفة', 404);
         }
-        return self::success($softdeleted, 'Deleted Tasks retrieved successfully');
+        return self::success($softdeleted, 'تم استرجاع المهام المحذوفة بنجاح');
     }
 
     /**
-     * Restore a soft-deleted record.
+     * استعادة مهمة محذوفة.
      * @param string $id
      * @return JsonResponse
      */
@@ -166,19 +165,19 @@ class TaskController extends Controller
         $task->restore();
         Cache::forget('tasks');
         Cache::forget('task_' . $task->id);
-        return self::success($task, 'Task restored successfully');
+        return self::success($task, 'تم استعادة المهمة بنجاح');
     }
 
     /**
-     * Permanently delete a soft-deleted record.
+     * حذف مهمة محذوفة بشكل دائم.
      * @param string $id
      * @return JsonResponse
      */
     public function forceDeleted(string $id): JsonResponse
     {
-        $task = Task::onlyTrashed()->findOrFail($id)->forceDelete();
+        Task::onlyTrashed()->findOrFail($id)->forceDelete();
         Cache::forget('tasks');
-        Cache::forget('task_' . $task->id);
-        return self::success(null, 'Task force deleted successfully');
+        Cache::forget('task_' . $id);
+        return self::success(null, 'تم حذف المهمة بشكل دائم');
     }
 }

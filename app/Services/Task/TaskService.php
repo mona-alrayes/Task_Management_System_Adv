@@ -7,8 +7,7 @@ use App\Models\Task;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Database\Eloquent\RelationNotFoundException;
+
 
 class TaskService
 {
@@ -56,7 +55,7 @@ class TaskService
             return $task;
         } catch (Exception $exception) {
             Log::error("Error storing task. Error: " . $exception->getMessage());
-            throw new Exception('حدث خطأ أثناء محاولة تخزين البيانات'); 
+            throw new Exception('حدث خطأ أثناء محاولة تخزين البيانات');
         }
     }
 
@@ -77,27 +76,19 @@ class TaskService
             Cache::forget('tasks');
 
             return $task;
-        } catch (ModelNotFoundException $e) {
-            Log::error("Task not found. Error: " . $e->getMessage());
-            throw new Exception('الموديل غير موجودة');
-        } catch (RelationNotFoundException $e) {
-            Log::error("Relation not found. Error: " . $e->getMessage());
-            throw new Exception('خطأ في عملية التحقق من الرابط');
         } catch (Exception $exception) {
             Log::error("Error updating task. Error: " . $exception->getMessage());
             throw new Exception('حدث خطأ أثناء محاولة تحديث البيانات');
         }
     }
 
-    #TODO go back here for error handling
+  
     public function updateStatus(Task $task, array $data)
     {
         try {
             // Check if the task has any dependencies that are not completed
             if ($task->dependencies()->where('status', '!=', 'Completed')->exists()) {
-                return response()->json([
-                    'message' => 'لا يمكن تغيير حالة المهمة لأن بعض المهام المعتمدة عليها لم تكتمل بعد.',
-                ], 400);
+                throw new Exception('لا يمكن تغيير حالة المهمة لأن بعض المهام المعتمدة عليها لم تكتمل بعد.');
             }
 
             // If task has no incomplete dependencies, proceed with the status update
@@ -111,28 +102,17 @@ class TaskService
                 // Update their status to 'open'
                 foreach ($dependentTasks as $dependentTask) {
                     $dependentTask->update(['status' => 'open']);
-
-                    // Optionally delete the record from the pivot table
+                    // delete the record from the pivot table
                     $task->dependentTasks()->detach($dependentTask->id);
                 }
             }
             // Clear cache
             Cache::forget('tasks');
+            return $task;
 
-            return response()->json([
-                'message' => 'تم تحديث حالة المهمة بنجاح.',
-                'task' => $task
-            ], 200);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'message' => 'لم يتم العثور على المهمة.',
-            ], 404);
         } catch (Exception $e) {
             Log::error("Error updating task: " . $e->getMessage());
-
-            return response()->json([
-                'message' => 'حدث خطأ أثناء محاولة تحديث المهمة.',
-            ], 500);
+            throw new Exception('حدث خطأ أثناء محاولة تحديث البيانات');
         }
     }
 
@@ -144,9 +124,6 @@ class TaskService
             $task->update(['assigned_to' => $Data['assigned_to']]);
             cache::forget('tasks');
             return $task;
-        } catch (ModelNotFoundException $e) {
-            Log::error("Task not found for reassignment. Error: " . $e->getMessage());
-            throw new Exception('الموديل غير موجودة');
         } catch (Exception $e) {
             Log::error("Error reassigning task. Error: " . $e->getMessage());
             throw new Exception('حدث خطأ أثناء محاولة تحديث البيانات');
@@ -159,9 +136,6 @@ class TaskService
             $task->update(['assigned_to' => $Data['assigned_to']]);
             cache::forget('tasks');
             return $task;
-        } catch (ModelNotFoundException $e) {
-            Log::error("Task not found for assignment. Error: " . $e->getMessage());
-            throw new Exception('الموديل غير موجودة');
         } catch (Exception $e) {
             Log::error("Error assigning task. Error: " . $e->getMessage());
             throw new Exception('حدث خطأ أثناء محاولة تحديث البيانات');
