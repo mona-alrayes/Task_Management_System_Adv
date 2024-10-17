@@ -1,3 +1,83 @@
+# Task Management System Advanced
+
+## Description
+This project is a ** Task Management System Advanced ** built with **Laravel 10** that provides a **RESTful API**  for managing task system  with different roles and dealing with task depandances so they can do their job effiently . The system Has **JWT Authentication** for ( Register , login , logout , refresh)  . The project follows **repository design patterns** and incorporates **clean code** and **refactoring principles**. also adding **security level** to protect the system such as protecting against famous attacks such as XSS,SQl Injection, CSRF ,Bruce-Force 
+with adding applity to scan files for viruces and safe uploading attachements to the system
+**Error log System** also added to the system to deal with errors and analizing them for better performance for the system 
+**rate limiting** for routes to protect against DDos attacks 
+**Task Log System** for watching changes that's happening on task system 
+
+### Key Features:
+- **CRUD Operations**: Create, read, update, delete and restore and softdelets methods for tasks with advanced filters on searching on tasks and method for adding attachements on tasks.
+- **CRUD Operations**: Create, read, update, delete , restore for Users .
+- **CRUD Operations**: Create, read, update, delete , restore for comments as morph relationship .
+- **Operations for Authentication** : register, login , logout and refresh .
+
+- **Repository Design Pattern**: Implements repositories and services for clean separation of concerns.
+- **Form Requests**: Validation is handled by custom form request classes.
+- **API Response Service**: Unified responses for API endpoints.
+- **Pagination**: Results are paginated for better performance and usability.
+- **Seeders**: Populate the database with initial data for testing and development.
+
+### Technologies Used:
+- **Laravel 10**
+- **PHP**
+- **MySQL**
+- **XAMPP** (for local development environment)
+- **Composer** (PHP dependency manager)
+- **Postman Collection**: Contains all API requests for easy testing and interaction with the API.
+
+---
+
+## Installation
+
+### Prerequisites
+
+Ensure you have the following installed on your machine:
+- **XAMPP**: For running MySQL and Apache servers locally.
+- **Composer**: For PHP dependency management.
+- **PHP**: Required for running Laravel.
+- **MySQL**: Database for the project
+- **Postman**: Required for testing the requestes.
+
+### Steps to Run the Project
+
+1. Clone the Repository  
+   ```bash
+  https://github.com/mona-alrayes/Task_Management_System_Adv
+2. Navigate to the Project Directory
+   ```bash
+   cd Task_Management_System_Adv
+3. Install Dependencies
+   ```bash
+   composer install
+4. Create Environment File
+   ```bash
+   cp .env.example .env
+   Update the .env file with your database configuration (MySQL credentials, database name, etc.).
+5. Generate Application Key
+    ```bash
+    php artisan key:generate
+6. Run Migrations
+    ```bash
+    php artisan migrate
+7. Run this command to generate JWT Secret
+   ```bash
+   php artisan jwt:secret
+   
+9. Seed the Database
+    ```bash
+    php artisan db:seed
+10. Run the Application
+    ```bash
+    php artisan serve
+11. Interact with the API and test the various endpoints via Postman collection 
+    Get the collection from here: https://documenter.getpostman.com/view/34416184/2sAXqqchqz
+12. add VIRUSTOTAL_API_KEY : VirusTotal key here
+    ```bash
+VIRUSTOTAL_API_KEY=dc5a8210ae5ec5d7cd1b8e8cfdae16a790e6297112453053dfc78697cb8da43f
+
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
