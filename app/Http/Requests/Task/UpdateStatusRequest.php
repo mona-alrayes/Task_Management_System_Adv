@@ -13,7 +13,11 @@ class UpdateStatusRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true; // Change this to true if authorization is needed
+        
+        $task = $this->route('task');  
+
+        // Check if the authenticated user is the one assigned to the task
+        return $this->user()->id === $task->assigned_to;
     }
 
     /**
