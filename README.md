@@ -45,6 +45,7 @@ Ensure you have the following installed on your machine:
 1. Clone the Repository  
    ```bash
   https://github.com/mona-alrayes/Task_Management_System_Adv
+  
 2. Navigate to the Project Directory
    ```bash
    cd Task_Management_System_Adv
@@ -72,8 +73,9 @@ Ensure you have the following installed on your machine:
     ```bash
     php artisan serve
 11. Interact with the API and test the various endpoints via Postman collection 
-    Get the collection from here: https://documenter.getpostman.com/view/34416184/2sAXqqchqz
-12. add VIRUSTOTAL_API_KEY : VirusTotal key here
+    Get the collection from here: https://documenter.getpostman.com/view/34416184/2sAXxWYTj4
+    
+13. add VIRUSTOTAL_API_KEY : VirusTotal key here
     ```bash
 VIRUSTOTAL_API_KEY=dc5a8210ae5ec5d7cd1b8e8cfdae16a790e6297112453053dfc78697cb8da43f
 
