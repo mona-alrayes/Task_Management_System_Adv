@@ -114,7 +114,7 @@ class Task extends Model
             if ($task->isDirty('status')) {
                 TaskStatusUpdate::create([
                     'task_id' => $task->id,
-                    'old_status' => $task->getOriginal('status'),
+                    'old_status' => $task->getOriginal('status')?? null,
                     'new_status' => $task->status,
                     'changed_at' => now(),
                 ]);
@@ -129,7 +129,7 @@ class Task extends Model
                 TaskLog::create([
                     'task_id' => $task->id,
                     'field_changed' => $field,
-                    'old_value' => $task->getOriginal($field),
+                    'old_value' => $task->getOriginal($field)?? null,
                     'new_value' => $newValue,
                     'changed_at' => now(),
                 ]);
