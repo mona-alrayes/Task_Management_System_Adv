@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ErrorLogController;
@@ -29,6 +30,10 @@ Route::middleware(['throttle:30,1', 'security'])->group(function () {
     Route::post('tasks/{task}/comments', [CommentController::class, 'store']);
 });
 
+Route::apiResource('users', UserController::class);
+Route::get('users/deleted', [UserController::class, 'showDeleted'])->name('users.deleted');
+Route::put('users/{id}/restore', [UserController::class, 'restoreDeleted'])->name('users.restore');
+Route::delete('users/{id}force-delete', [UserController::class, 'forceDeleted'])->name('users.force-delete');
 
 
 Route::middleware(['security'])->group(function () {
@@ -45,3 +50,6 @@ Route::middleware(['security'])->group(function () {
     Route::get('/reports/daily-tasks', [ReportController::class, 'dailyTaskReport']);
     Route::get('/error-logs', [ErrorLogController::class, 'index']);
 });
+
+
+//admin routes 
