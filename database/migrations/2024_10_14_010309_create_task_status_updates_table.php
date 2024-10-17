@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('task_status_updates', function (Blueprint $table) {
             $table->id();
             $table->foreignId('task_id')->constrained('tasks')->onDelete('cascade');
-            $table->string('old_status');
-            $table->string('new_status');
+            $table->string('old_status')->nullable();
+            $table->string('new_status')->nullable();
             $table->timestamp('changed_at');
             $table->timestamps();
         });
