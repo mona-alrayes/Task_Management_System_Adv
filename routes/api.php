@@ -19,37 +19,51 @@ use App\Http\Controllers\Auth\AuthController;
 |
 */
 
-
-Route::middleware(['throttle:30,1', 'security'])->group(function () {
-    Route::put('tasks/{id}/restore', [TaskController::class, 'restoreDeleted']);
-    Route::delete('tasks/{id}/delete', [TaskController::class, 'forceDeleted']);
-    Route::put('tasks/{task}/status', [TaskController::class, 'statusChange']);
-    Route::post('tasks/{task}/assign', [TaskController::class, 'assignTask']);
-    Route::put('tasks/{task}/reassign', [TaskController::class, 'reassignTask']);
-    Route::post('tasks/{task}/attachments', [TaskController::class, 'uploadAttachment']);
-    Route::post('tasks/{task}/comments', [CommentController::class, 'store']);
-});
-
-Route::apiResource('users', UserController::class);
-Route::get('users/deleted', [UserController::class, 'showDeleted'])->name('users.deleted');
-Route::put('users/{id}/restore', [UserController::class, 'restoreDeleted'])->name('users.restore');
-Route::delete('users/{id}force-delete', [UserController::class, 'forceDeleted'])->name('users.force-delete');
-
-
 Route::middleware(['security'])->group(function () {
     Route::controller(AuthController::class)->group(function () {
-        Route::post('login', 'login')->middleware('throttle:login');;
+        Route::post('login', 'login')->middleware('throttle:login');   // allowed 5 attempets to protect from bruce-force attack
         Route::post('register', 'register');
         Route::post('logout', 'logout');
         Route::post('refresh', 'refresh');
     });
-    // You can use a different rate limit for other routes if needed
-    Route::get('tasks/deleted', [TaskController::class, 'showDeleted']);
-    Route::get('tasks/blockedTasks', [TaskController::class, 'blockedTasks']);
-    Route::apiResource('tasks', TaskController::class);
-    Route::get('/reports/daily-tasks', [ReportController::class, 'dailyTaskReport']);
-    Route::get('/error-logs', [ErrorLogController::class, 'index']);
 });
 
-
 //admin routes 
+Route::middleware(['throttle:60,1', 'security', 'auth:api', 'role:admin'])->group(function () {
+    //user routes
+    Route::apiResource('users', UserController::class);
+    Route::get('users/deleted', [UserController::class, 'showDeleted'])->name('users.deleted');
+    Route::put('users/{id}/restore', [UserController::class, 'restoreDeleted'])->name('users.restore');
+    Route::delete('users/{id}force-delete', [UserController::class, 'forceDeleted'])->name('users.force-delete');
+    //task routes
+    Route::apiResource('tasks', TaskController::class);
+    Route::get('tasks/deleted', [UserController::class, 'showDeleted']);
+    Route::put('tasks/{id}/restore', [TaskController::class, 'restoreDeleted']);
+    Route::delete('tasks/{id}/delete', [TaskController::class, 'forceDeleted']);
+    Route::get('/error-logs', [ErrorLogController::class, 'index']);
+    Route::get('/reports/daily-tasks', [ReportController::class, 'dailyTaskReport']);
+    Route::get('tasks/blockedTasks', [TaskController::class, 'blockedTasks']);
+    //admin can add comments 
+    Route::post('tasks/{task}/comments', [CommentController::class, 'store']);
+});
+
+//manager routes
+Route::middleware(['throttle:60,1', 'security', 'auth:api', 'role:manager'])->group(function () {
+   //assign and reassign tasks 
+   Route::post('tasks/{task}/assign', [TaskController::class, 'assignTask']);
+   Route::put('tasks/{task}/reassign', [TaskController::class, 'reassignTask']);
+   Route::get('tasks/blockedTasks', [TaskController::class, 'blockedTasks']);
+   //manager add attachements to developers
+   Route::post('tasks/{task}/attachments', [TaskController::class, 'uploadAttachment']);
+   // manager can see blocked tasks 
+   Route::get('tasks/blockedTasks', [TaskController::class, 'blockedTasks']);
+   // manager can add comments
+   Route::post('tasks/{task}/comments', [CommentController::class, 'store']);
+});
+
+//developer routes
+Route::middleware(['throttle:60,1', 'security', 'auth:api', 'role:developer'])->group(function () {
+    Route::put('tasks/{task}/status', [TaskController::class, 'statusChange']);
+    Route::post('tasks/{task}/comments', [CommentController::class, 'store']);
+    Route::get('tasks/blockedTasks', [TaskController::class, 'blockedTasks']);
+});
