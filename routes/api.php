@@ -67,3 +67,9 @@ Route::middleware(['throttle:60,1', 'security', 'auth:api', 'role:developer'])->
     Route::post('tasks/{task}/comments', [CommentController::class, 'store']);
     Route::get('tasks/blockedTasks', [TaskController::class, 'blockedTasks']);
 });
+
+Route::middleware(['throttle:60,1', 'security', 'auth:api'])->group(function () {
+
+Route::apiResource('tasks', TaskController::class)->only('index','show');
+
+});
