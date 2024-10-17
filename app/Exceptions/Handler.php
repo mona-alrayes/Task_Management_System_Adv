@@ -4,12 +4,13 @@ namespace App\Exceptions;
 
 use Exception;
 use Throwable;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Illuminate\Database\Eloquent\RelationNotFoundException;
 use App\Models\ErrorLog;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Database\Eloquent\RelationNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -35,6 +36,11 @@ class Handler extends ExceptionHandler
         if ($exception instanceof Exception) {
             Log::error("Error Happened : " . $exception->getMessage());
             return response()->json(['message' => 'حدث خطأ في المخدم'], 500);
+        }
+        if ($exception instanceof ThrottleRequestsException) {
+            return response()->json([
+                'message' => 'عدد محاولات تسجيل الدخول المسموح به قد انتهى. يُرجى المحاولة مرة أخرى بعد بضع دقائق.'
+            ], 429);
         }
 
         // For other exceptions, call the parent render method

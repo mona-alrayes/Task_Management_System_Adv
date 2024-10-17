@@ -18,23 +18,30 @@ use App\Http\Controllers\Auth\AuthController;
 |
 */
 
-Route::controller(AuthController::class)->group(function () {
-    Route::post('login', 'login');
-    Route::post('register', 'register');
-    Route::post('logout', 'logout');
-    Route::post('refresh', 'refresh');
 
+Route::middleware(['throttle:30,1', 'security'])->group(function () {
+    Route::put('tasks/{id}/restore', [TaskController::class, 'restoreDeleted']);
+    Route::delete('tasks/{id}/delete', [TaskController::class, 'forceDeleted']);
+    Route::put('tasks/{task}/status', [TaskController::class, 'statusChange']);
+    Route::post('tasks/{task}/assign', [TaskController::class, 'assignTask']);
+    Route::put('tasks/{task}/reassign', [TaskController::class, 'reassignTask']);
+    Route::post('tasks/{task}/attachments', [TaskController::class, 'uploadAttachment']);
+    Route::post('tasks/{task}/comments', [CommentController::class, 'store']);
 });
-Route::get('tasks/deleted', [TaskController::class , 'showDeleted']);
-Route::put('tasks/{id}/restore', [TaskController::class , 'restoreDeleted']);
-Route::delete('tasks/{id}/delete', [TaskController::class , 'forceDeleted']);
-Route::post('tasks/{task}/attachments', [TaskController::class, 'uploadAttachment']);
-Route::put('tasks/{task}/status', [TaskController::class , 'statusChange']);
-Route::get('tasks/blockedTasks', [TaskController::class , 'blockedTasks']);
-Route::post('tasks/{task}/assign' , [TaskController::class , 'assignTask']);
-Route::put('tasks/{task}/reassign', [TaskController::class , 'reassignTask']);
-Route::post('/tasks/{task}/comments', [CommentController::class, 'store']);
-Route::apiResource('tasks', TaskController::class);
-Route::get('/reports/daily-tasks', [ReportController::class, 'dailyTaskReport']);
 
-Route::get('/error-logs', [ErrorLogController::class, 'index']);
+
+
+Route::middleware(['security'])->group(function () {
+    Route::controller(AuthController::class)->group(function () {
+        Route::post('login', 'login')->middleware('throttle:login');;
+        Route::post('register', 'register');
+        Route::post('logout', 'logout');
+        Route::post('refresh', 'refresh');
+    });
+    // You can use a different rate limit for other routes if needed
+    Route::get('tasks/deleted', [TaskController::class, 'showDeleted']);
+    Route::get('tasks/blockedTasks', [TaskController::class, 'blockedTasks']);
+    Route::apiResource('tasks', TaskController::class);
+    Route::get('/reports/daily-tasks', [ReportController::class, 'dailyTaskReport']);
+    Route::get('/error-logs', [ErrorLogController::class, 'index']);
+});
