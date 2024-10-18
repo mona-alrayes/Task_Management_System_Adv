@@ -36,40 +36,30 @@ Route::middleware(['throttle:60,1', 'security', 'auth:api', 'role:admin'])->grou
     Route::put('users/{id}/restore', [UserController::class, 'restoreDeleted'])->name('users.restore');
     Route::delete('users/{id}force-delete', [UserController::class, 'forceDeleted'])->name('users.force-delete');
     //task routes
-    Route::apiResource('tasks', TaskController::class);
     Route::get('tasks/deleted', [UserController::class, 'showDeleted']);
     Route::put('tasks/{id}/restore', [TaskController::class, 'restoreDeleted']);
     Route::delete('tasks/{id}/delete', [TaskController::class, 'forceDeleted']);
+    Route::apiResource('tasks', TaskController::class);
     Route::get('/error-logs', [ErrorLogController::class, 'index']);
     Route::get('/reports/daily-tasks', [ReportController::class, 'dailyTaskReport']);
-    Route::get('tasks/blockedTasks', [TaskController::class, 'blockedTasks']);
-    //admin can add comments 
-    Route::post('tasks/{task}/comments', [CommentController::class, 'store']);
 });
 
-//manager routes
+// manager routes
 Route::middleware(['throttle:60,1', 'security', 'auth:api', 'role:manager'])->group(function () {
    //assign and reassign tasks 
    Route::post('tasks/{task}/assign', [TaskController::class, 'assignTask']);
    Route::put('tasks/{task}/reassign', [TaskController::class, 'reassignTask']);
-   Route::get('tasks/blockedTasks', [TaskController::class, 'blockedTasks']);
    //manager add attachements to developers
    Route::post('tasks/{task}/attachments', [TaskController::class, 'uploadAttachment']);
-   // manager can see blocked tasks 
-   Route::get('tasks/blockedTasks', [TaskController::class, 'blockedTasks']);
-   // manager can add comments
-   Route::post('tasks/{task}/comments', [CommentController::class, 'store']);
 });
 
-//developer routes
+// developer routes
 Route::middleware(['throttle:60,1', 'security', 'auth:api', 'role:developer'])->group(function () {
     Route::put('tasks/{task}/status', [TaskController::class, 'statusChange']);
-    Route::post('tasks/{task}/comments', [CommentController::class, 'store']);
-    Route::get('tasks/blockedTasks', [TaskController::class, 'blockedTasks']);
 });
 
 Route::middleware(['throttle:60,1', 'security', 'auth:api'])->group(function () {
-
 Route::apiResource('tasks', TaskController::class)->only('index','show');
-
+Route::get('tasks/blockedTasks', [TaskController::class, 'blockedTasks']);   // all roles can reach this
+Route::post('tasks/{task}/comments', [CommentController::class, 'store']);   // all roles can reach this
 });

@@ -13,8 +13,8 @@ class UpdateStatusRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        
-        $task = $this->route('task');  
+
+        $task = $this->route('task');
 
         // Check if the authenticated user is the one assigned to the task
         return $this->user()->id === $task->assigned_to;
@@ -83,5 +83,18 @@ class UpdateStatusRequest extends FormRequest
             'message' => 'فشلت عملية التحقق من صحة البيانات.',
             'errors' => $validator->errors(),
         ], 422));
+    }
+    
+     /**
+     * Handle a failed authorization attempt.
+     *
+     * @return void
+     */
+    protected function failedAuthorization(): void
+    {
+        throw new HttpResponseException(response()->json([
+            'status' => 'خطأ',
+            'message' => 'ليس لديك الإذن لتحديث هذه المهمة.',
+        ], 403)); // 403 Forbidden
     }
 }

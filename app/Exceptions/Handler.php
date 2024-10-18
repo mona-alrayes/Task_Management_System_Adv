@@ -33,10 +33,6 @@ class Handler extends ExceptionHandler
             Log::error("Relation not found. Error: " . $exception->getMessage());
             return response()->json(['message' => 'العلاقة غير موجودة'], 404);
         }
-        if ($exception instanceof Exception) {
-            Log::error("Error Happened : " . $exception->getMessage());
-            return response()->json(['message' => 'حدث خطأ في المخدم'], 500);
-        }
         if ($exception instanceof ThrottleRequestsException) {
             return response()->json([
                 'message' => 'عدد محاولات تسجيل الدخول المسموح به قد انتهى. يُرجى المحاولة مرة أخرى بعد بضع دقائق.'
