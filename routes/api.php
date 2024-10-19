@@ -31,10 +31,11 @@ Route::middleware(['security'])->group(function () {
 //admin routes 
 Route::middleware(['throttle:60,1', 'security', 'auth:api', 'role:admin'])->group(function () {
     //user routes
-    Route::apiResource('users', UserController::class);
     Route::get('users/deleted', [UserController::class, 'showDeleted'])->name('users.deleted');
     Route::put('users/{id}/restore', [UserController::class, 'restoreDeleted'])->name('users.restore');
     Route::delete('users/{id}force-delete', [UserController::class, 'forceDeleted'])->name('users.force-delete');
+    Route::apiResource('users', UserController::class);
+    
     //task routes
     Route::get('tasks/deleted', [UserController::class, 'showDeleted']);
     Route::put('tasks/{id}/restore', [TaskController::class, 'restoreDeleted']);

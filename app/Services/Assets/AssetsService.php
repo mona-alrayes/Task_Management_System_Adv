@@ -77,14 +77,14 @@ class AssetsService
         $scanResult = $this->scanFile($file);
         
         // Check scan results for malicious content
-        if (isset($scanResult['data']['attributes']['last_analysis_stats'])) {
-            $maliciousCount = $scanResult['data']['attributes']['last_analysis_stats']['malicious'] ?? 0;
+        if (isset($scanResult['data']['attributes']['stats'])) {
+            $maliciousCount = $scanResult['data']['attributes']['stats']['malicious'] ?? 0;
             if ($maliciousCount > 0) {
                 throw new Exception('File contains a virus!', 400);
+            }else {
+                $message = 'Scan completed successfully, no virus found :)';
             }
-        } else {
-            $message = 'Scan completed successfully, no virus found :)';
-        }
+        } 
 
         // Validate and store the attachment
         $originalName = $file->getClientOriginalName();
