@@ -60,8 +60,8 @@ Route::middleware(['throttle:60,1', 'security', 'auth:api', 'role:developer'])->
 
 // all logged in users
 Route::middleware(['throttle:60,1', 'security', 'auth:api'])->group(function () {
-    Route::apiResource('tasks', TaskController::class)->only(['index', 'show']);
     Route::get('tasks/blockedTasks', [TaskController::class, 'blockedTasks'])->name('tasks.blockedTasks');
+    Route::apiResource('tasks', TaskController::class)->only(['index', 'show']);
     
     // Comment routes - all roles currently have access
     Route::post('tasks/{task}/comments', [CommentController::class, 'store'])->name('comments.store');
