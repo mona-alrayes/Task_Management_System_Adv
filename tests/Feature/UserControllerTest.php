@@ -61,22 +61,6 @@ class UserControllerTest extends TestCase
         $response->assertJsonValidationErrors(['name', 'email', 'password', 'role']);
     }
 
-    /** @test */
-    // public function admin_can_update_user()
-    // {
-    //     $admin = $this->createUserWithRole('admin');
-    //     $user = User::factory()->create();
-
-    //     $updateData = [
-    //         'name' => 'Updated Name',
-    //         'email' => 'updated@example.com',
-    //         'password' => 'UpdatedPassword123!',
-    //         'role' => 'developer'
-    //     ];
-
-    //     $response = $this->actingAs($admin, 'api')->putJson(route('users.update', $user->id), $updateData);
-    //     $response->assertStatus(200);
-    // }
 
     /** @test */
     public function non_admin_cannot_update_user()
