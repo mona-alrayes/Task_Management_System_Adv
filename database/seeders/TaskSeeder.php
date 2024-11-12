@@ -48,7 +48,7 @@ class TaskSeeder extends Seeder
             'due_date' => '20-09-2024',
             'assigned_to' => '5',  // ayham
         ]);
-        $task4->dependencies()->sync(1);    //depends on task1
+        $task4->dependencies()->sync([1]);    //depends on task1
         $task4->status = 'blocked';
         $task4->save();
 
@@ -60,7 +60,7 @@ class TaskSeeder extends Seeder
             'due_date' => '22-09-2024',
             'assigned_to' => '6',  // yosef
         ]);
-        $task5->dependencies()->sync(2);    //depends on task2
+        $task5->dependencies()->sync([2]);    //depends on task2
         $task5->status = 'blocked';
         $task5->save();
 
@@ -72,7 +72,7 @@ class TaskSeeder extends Seeder
             'due_date' => '25-09-2024',
             'assigned_to' => '4',  // hani
         ]);
-        $task6->dependencies()->sync(3);    //depends on task3
+        $task6->dependencies()->sync([3]);    //depends on task3
         $task6->status = 'blocked';
         $task6->save();
     }

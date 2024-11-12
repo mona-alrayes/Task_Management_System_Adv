@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Task;
 use App\Models\Comment;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Services\Comment\CommentService;
 use App\Http\Requests\Comment\StoreCommentRequest;
@@ -22,13 +21,14 @@ class CommentController extends Controller
     /**
      * Display a listing of the comments.
      *
-     * @param Request $request
+     * @param Task $task 
      * @return JsonResponse
      * @throws \Exception
      */
-    public function index(Request $request)
+    public function index(Task $task)
     {
-        // Implementation will go here
+        $comments = $task->comments()->paginate(10);
+        return Self::paginated($comments , 'Tasks retrieved successfully.', 200);
     }
 
     /**
@@ -49,12 +49,13 @@ class CommentController extends Controller
      * Display the specified comment.
      *
      * @param Comment $comment
-     * @param string $task_id
+     * @param Task $task
      * @return JsonResponse
      */
-    public function show(Comment $comment, string $task_id): JsonResponse
+    public function show(Task $task, Comment $comment): JsonResponse
     {
-        return self::success($comment, 'Comment retrieved successfully');
+        $taskComment = $task->comments()->findOrFail($comment->id);
+        return self::success($taskComment, 'Comment retrieved successfully');
     }
 
     /**
@@ -62,13 +63,13 @@ class CommentController extends Controller
      *
      * @param UpdateCommentRequest $request
      * @param Comment $comment
-     * @param string $task_id
+     * @param Task $task
      * @return JsonResponse
      * @throws \Exception
      */
-    public function update(UpdateCommentRequest $request, Comment $comment, string $task_id): JsonResponse
+    public function update(UpdateCommentRequest $request, Task $task, Comment $comment): JsonResponse
     {
-        $updatedComment = $this->commentService->updateComment($comment, $request->validated(), $task_id);
+        $updatedComment = $this->commentService->updateComment($comment, $request->validated(), $task);
         return self::success($updatedComment, 'Comment updated successfully');
     }
 

@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
@@ -27,40 +26,46 @@ Route::middleware(['security'])->group(function () {
         Route::post('refresh', 'refresh');
     });
 });
-
+// all logged in users
+Route::middleware(['throttle:60,1', 'security', 'auth:api'])->group(function () {
+    Route::apiResource('tasks', TaskController::class)->only(['index', 'show']);
+    Route::get('tasks/blockedTasks', [TaskController::class, 'blockedTasks'])->name('tasks.blockedTasks');
+    
+    // Comment routes - all roles currently have access
+    Route::post('tasks/{task}/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::put('tasks/{task}/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
+    Route::get('tasks/{task}/commments' , [CommentController::class, 'index'])->name('comments.index');
+    Route::get('tasks/{task}/comments/{comment}',[CommentController::class, 'show'])->name('comments.show');
+});
 //admin routes 
 Route::middleware(['throttle:60,1', 'security', 'auth:api', 'role:admin'])->group(function () {
     //user routes
     Route::get('users/deleted', [UserController::class, 'showDeleted'])->name('users.deleted');
     Route::put('users/{id}/restore', [UserController::class, 'restoreDeleted'])->name('users.restore');
-    Route::delete('users/{id}force-delete', [UserController::class, 'forceDeleted'])->name('users.force-delete');
+    Route::delete('users/{id}/force-delete', [UserController::class, 'forceDeleted'])->name('users.force-delete');
     Route::apiResource('users', UserController::class);
     
     //task routes
-    Route::get('tasks/deleted', [UserController::class, 'showDeleted']);
+    Route::get('tasks/deleted', [TaskController::class, 'showDeleted']);
     Route::put('tasks/{id}/restore', [TaskController::class, 'restoreDeleted']);
     Route::delete('tasks/{id}/delete', [TaskController::class, 'forceDeleted']);
-    Route::apiResource('tasks', TaskController::class);
-    Route::get('/error-logs', [ErrorLogController::class, 'index']);
-    Route::get('/reports/daily-tasks', [ReportController::class, 'dailyTaskReport']);
+    Route::apiResource('tasks', TaskController::class)->except(['index', 'show']);;
+    Route::get('/error-logs', [ErrorLogController::class, 'index'])->name('Errorlog');
+    Route::get('/reports/daily-tasks', [ReportController::class, 'dailyTaskReport'])->name('dailyTasks');
 });
 
 // manager routes
 Route::middleware(['throttle:60,1', 'security', 'auth:api', 'role:manager'])->group(function () {
    //assign and reassign tasks 
-   Route::post('tasks/{task}/assign', [TaskController::class, 'assignTask']);
-   Route::put('tasks/{task}/reassign', [TaskController::class, 'reassignTask']);
+   Route::post('tasks/{task}/assign', [TaskController::class, 'assignTask'])->name('assignTask');;
+   Route::put('tasks/{task}/reassign', [TaskController::class, 'reassignTask'])->name('reassignTask');;
    //manager add attachements to developers
-   Route::post('tasks/{task}/attachments', [TaskController::class, 'uploadAttachment']);
+   Route::post('tasks/{task}/attachments', [TaskController::class, 'uploadAttachment'])->name('uploadAttachment');
 });
 
 // developer routes
 Route::middleware(['throttle:60,1', 'security', 'auth:api', 'role:developer'])->group(function () {
-    Route::put('tasks/{task}/status', [TaskController::class, 'statusChange']);
+    Route::put('tasks/{task}/status', [TaskController::class, 'statusChange'])->name('tasks.statusChange');
 });
 
-Route::middleware(['throttle:60,1', 'security', 'auth:api'])->group(function () {
-Route::apiResource('tasks', TaskController::class)->only('index','show');
-Route::get('tasks/blockedTasks', [TaskController::class, 'blockedTasks']);   // all roles can reach this
-Route::post('tasks/{task}/comments', [CommentController::class, 'store']);   // all roles can reach this
-});
+

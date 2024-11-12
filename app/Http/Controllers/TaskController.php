@@ -32,12 +32,8 @@ class TaskController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        try {
-            $tasks = $this->taskService->getTasks($request);
-            return self::paginated($tasks, 'Tasks retrieved successfully.', 200);
-        } catch (\Exception $e) {
-            return self::error(null, 'Failed to retrieve tasks.', 500);
-        }
+        $tasks = $this->taskService->getTasks($request);
+        return self::paginated($tasks, 'Tasks retrieved successfully.', 200);
     }
 
     /**
@@ -48,12 +44,8 @@ class TaskController extends Controller
      */
     public function store(StoreTaskRequest $request): JsonResponse
     {
-        try {
-            $task = $this->taskService->storeTask($request->validated());
-            return self::success($task, 'Task created successfully.', 201);
-        } catch (\Exception $e) {
-            return self::error(null, 'Failed to create task.', 500);
-        }
+        $task = $this->taskService->storeTask($request->validated());
+        return self::success($task, 'Task created successfully.', 201);
     }
 
     /**
@@ -66,7 +58,6 @@ class TaskController extends Controller
     public function uploadAttachment(Request $request, Task $task): JsonResponse
     {
         $request->validate(['file' => 'required|file|max:2048']);
-
         try {
             $file = $request->file('file');
             $attachment = $this->assetsService->storeAttachment($file, Task::class, $task->id);
@@ -84,12 +75,8 @@ class TaskController extends Controller
      */
     public function show(Task $task): JsonResponse
     {
-        try {
-            $taskData = Cache::remember('task_' . $task->id, 3600, fn() => $task->load('comments'));
-            return self::success($taskData, 'Task retrieved successfully.');
-        } catch (\Exception $e) {
-            return self::error(null, 'Failed to retrieve task.', 500);
-        }
+        $taskData = Cache::remember('task_' . $task->id, 3600, fn() => $task->load('comments'));
+        return self::success($taskData, 'Task retrieved successfully.');
     }
 
     /**
@@ -101,12 +88,8 @@ class TaskController extends Controller
      */
     public function update(UpdateTaskRequest $request, Task $task): JsonResponse
     {
-        try {
-            $updatedTask = $this->taskService->updateTask($task, $request->validated());
-            return self::success($updatedTask, 'Task updated successfully.');
-        } catch (\Exception $e) {
-            return self::error(null, 'Failed to update task.', 500);
-        }
+        $updatedTask = $this->taskService->updateTask($task, $request->validated());
+        return self::success($updatedTask, 'Task updated successfully.');
     }
 
     /**
@@ -118,12 +101,8 @@ class TaskController extends Controller
      */
     public function statusChange(UpdateStatusRequest $request, Task $task): JsonResponse
     {
-        try {
-            $updateStatusTask = $this->taskService->updateStatus($task, $request->validated());
-            return self::success($updateStatusTask, 'Task status updated successfully.');
-        } catch (\Exception $e) {
-            return self::error(null, $e->getMessage(), 400); // Better handling of specific error messages
-        }
+        $updateStatusTask = $this->taskService->updateStatus($task, $request->validated());
+        return self::success($updateStatusTask, 'Task status updated successfully.');
     }
 
     /**
@@ -135,12 +114,8 @@ class TaskController extends Controller
      */
     public function reassignTask(assignedToRequest $request, Task $task): JsonResponse
     {
-        try {
-            $reassignedTask = $this->taskService->reassignTask($task, $request->validated());
-            return self::success($reassignedTask, 'Task reassigned successfully.');
-        } catch (\Exception $e) {
-            return self::error(null, 'Failed to reassign task.', 500);
-        }
+        $reassignedTask = $this->taskService->reassignTask($task, $request->validated());
+        return self::success($reassignedTask, 'Task reassigned successfully.');
     }
 
     /**
@@ -152,12 +127,8 @@ class TaskController extends Controller
      */
     public function assignTask(AssignedToRequest $request, Task $task): JsonResponse
     {
-        try {
-            $assignedTask = $this->taskService->assignTask($task, $request->validated());
-            return self::success($assignedTask, 'Task assigned successfully.');
-        } catch (\Exception $e) {
-            return self::error(null, 'Failed to assign task.', 500);
-        }
+        $assignedTask = $this->taskService->assignTask($task, $request->validated());
+        return self::success($assignedTask, 'Task assigned successfully.');
     }
 
     /**
@@ -167,12 +138,8 @@ class TaskController extends Controller
      */
     public function blockedTasks(): JsonResponse
     {
-        try {
-            $blockedTasks = Task::blockedTasks();
-            return self::success($blockedTasks, 'Blocked tasks retrieved successfully.');
-        } catch (\Exception $e) {
-            return self::error(null, 'Failed to retrieve blocked tasks.', 500);
-        }
+        $blockedTasks = Task::blockedTasks();
+        return self::success($blockedTasks, 'Blocked tasks retrieved successfully.');
     }
 
     /**
@@ -183,14 +150,10 @@ class TaskController extends Controller
      */
     public function destroy(Task $task): JsonResponse
     {
-        try {
-            $task->delete();
-            Cache::forget('task_' . $task->id);
-            $this->taskService->clearTaskCache();
-            return self::success(null, 'Task deleted successfully.');
-        } catch (\Exception $e) {
-            return self::error(null, 'Failed to delete task.', 500);
-        }
+        $task->delete();
+        Cache::forget('task_' . $task->id);
+        $this->taskService->clearTaskCache();
+        return self::success(null, 'Task deleted successfully.');
     }
 
     /**
@@ -200,15 +163,11 @@ class TaskController extends Controller
      */
     public function showDeleted(): JsonResponse
     {
-        try {
-            $softDeleted = Task::onlyTrashed()->get();
-            if ($softDeleted->isEmpty()) {
-                return self::error(null, 'No deleted tasks found.', 404);
-            }
-            return self::success($softDeleted, 'Soft-deleted tasks retrieved successfully.');
-        } catch (\Exception $e) {
-            return self::error(null, 'Failed to retrieve deleted tasks.', 500);
+        $softDeleted = Task::onlyTrashed()->get();
+        if ($softDeleted->isEmpty()) {
+            return self::error(null, 'No deleted tasks found.', 404);
         }
+        return self::success($softDeleted, 'Soft-deleted tasks retrieved successfully.');
     }
 
     /**
@@ -219,15 +178,11 @@ class TaskController extends Controller
      */
     public function restoreDeleted(string $id): JsonResponse
     {
-        try {
-            $task = Task::onlyTrashed()->findOrFail($id);
-            $task->restore();
-            Cache::forget('task_' . $task->id);
-            $this->taskService->clearTaskCache();
-            return self::success($task, 'Task restored successfully.');
-        } catch (\Exception $e) {
-            return self::error(null, 'Failed to restore task.', 500);
-        }
+        $task = Task::onlyTrashed()->findOrFail($id);
+        $task->restore();
+        Cache::forget('task_' . $task->id);
+        $this->taskService->clearTaskCache();
+        return self::success($task, 'Task restored successfully.');
     }
 
     /**
@@ -238,13 +193,9 @@ class TaskController extends Controller
      */
     public function forceDeleted(string $id): JsonResponse
     {
-        try {
-            Task::onlyTrashed()->findOrFail($id)->forceDelete();
-            Cache::forget('task_' . $id);
-            $this->taskService->clearTaskCache();
-            return self::success(null, 'Task permanently deleted.');
-        } catch (\Exception $e) {
-            return self::error(null, 'Failed to permanently delete task.', 500);
-        }
+        Task::onlyTrashed()->findOrFail($id)->forceDelete();
+        Cache::forget('task_' . $id);
+        $this->taskService->clearTaskCache();
+        return self::success(null, 'Task permanently deleted.');
     }
 }

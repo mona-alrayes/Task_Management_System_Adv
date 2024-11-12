@@ -45,7 +45,7 @@ class AuthController extends Controller
                 'token' => $AuthData['token'],
                 'type' => 'bearer',
             ]
-        ]);
+        ],200);
     }
 
     /**
@@ -70,7 +70,7 @@ class AuthController extends Controller
                 'token' => $user['token'],
                 'type' => 'bearer',
             ]
-        ]);
+        ], 201);
     }
 
     /**

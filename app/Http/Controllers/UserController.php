@@ -30,7 +30,6 @@ class UserController extends Controller
      * Using pagination to prevent returning large datasets in one response.
      * This improves performance and is a common best practice when handling large collections.
      * 
-     * @return JsonResponse
      */
     public function index()
     {
@@ -45,7 +44,6 @@ class UserController extends Controller
      * Only the validated data is passed to the service layer, promoting clean and maintainable code.
      *
      * @param storeUserRequest $request
-     * @return JsonResponse
      */
     public function store(storeUserRequest $request)
     {
@@ -60,7 +58,6 @@ class UserController extends Controller
      * This is a best practice to reduce manual model retrieval.
      * 
      * @param User $user
-     * @return JsonResponse
      */
     public function show(User $user)
     {
@@ -75,7 +72,6 @@ class UserController extends Controller
      *
      * @param updateUserRequest $request
      * @param User $user
-     * @return JsonResponse
      */
     public function update(updateUserRequest $request, User $user)
     {
@@ -90,7 +86,6 @@ class UserController extends Controller
      * If data should not be permanently deleted immediately, this is the best practice to avoid data loss.
      *
      * @param User $user
-     * @return JsonResponse
      */
     public function destroy(User $user)
     {
@@ -104,7 +99,6 @@ class UserController extends Controller
      * Best practice: Separating active and soft-deleted records is useful for showing or restoring previously deleted records.
      * Using `onlyTrashed()` helps to clearly retrieve only soft-deleted users.
      *
-     * @return JsonResponse
      */
     public function showDeleted()
     {
@@ -122,7 +116,6 @@ class UserController extends Controller
      * Use `findOrFail()` to ensure proper error handling in case the user is not found.
      * 
      * @param string $id
-     * @return JsonResponse
      */
     public function restoreDeleted(string $id)
     {
@@ -138,7 +131,6 @@ class UserController extends Controller
      * Use `forceDelete()` carefully, as it will remove the user data permanently from the database.
      *
      * @param string $id
-     * @return JsonResponse
      */
     public function forceDeleted(string $id)
     {

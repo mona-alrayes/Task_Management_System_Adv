@@ -24,11 +24,18 @@ class CommentService
     }
 
 
-    public function updateComment(Comment $comment, $Data, string $task_id): Comment
+    public function updateComment(Comment $comment, $Data, Task $task): Comment
     {
         try {
-            $comment->update(array_filter($Data));
-            return $comment;
+        // ensure the comment belongs to this task
+        $taskComment = $task->comments()->findOrFail($comment->id);
+
+        // Update the comment with the validated data
+        $taskComment->update($Data);
+
+        return $taskComment;
+            
+          
         } catch (Exception $exception) {
             Log::error("Error updating comment. Error: " . $exception->getMessage());
             throw new Exception('حدث خطأ أثناء محاولة تحديث البيانات');
