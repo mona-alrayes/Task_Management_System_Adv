@@ -37,34 +37,6 @@ class TaskControllerTest extends TestCase
         $this->developer->assignRole('developer');
     }
 
-    // /** @test */
-    // public function an_admin_can_show_deleted_tasks()
-    // {
-    //     $this->actingAs($this->admin, 'api')
-    //         ->getJson(route('tasks.deleted'))
-    //         ->assertStatus(200);
-    // }
-
-    // /** @test */
-    // public function an_admin_can_restore_a_deleted_task()
-    // {
-    //     $task = Task::factory()->trashed()->create();
-
-    //     $this->actingAs($this->admin, 'api')
-    //         ->putJson(route('tasks.restore', ['id' => $task->id]))
-    //         ->assertStatus(200);
-    // }
-
-    // /** @test */
-    // public function an_admin_can_permanently_delete_a_task()
-    // {
-    //     $task = Task::factory()->trashed()->create();
-
-    //     $this->actingAs($this->admin, 'api')
-    //         ->deleteJson(route('tasks.forceDelete', ['id' => $task->id]))
-    //         ->assertStatus(200);
-    // }
-
     /** @test */
     public function an_admin_can_create_a_task()
     {
