@@ -26,17 +26,7 @@ Route::middleware(['security'])->group(function () {
         Route::post('refresh', 'refresh');
     });
 });
-// all logged in users
-Route::middleware(['throttle:60,1', 'security', 'auth:api'])->group(function () {
-    Route::apiResource('tasks', TaskController::class)->only(['index', 'show']);
-    Route::get('tasks/blockedTasks', [TaskController::class, 'blockedTasks'])->name('tasks.blockedTasks');
-    
-    // Comment routes - all roles currently have access
-    Route::post('tasks/{task}/comments', [CommentController::class, 'store'])->name('comments.store');
-    Route::put('tasks/{task}/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
-    Route::get('tasks/{task}/commments' , [CommentController::class, 'index'])->name('comments.index');
-    Route::get('tasks/{task}/comments/{comment}',[CommentController::class, 'show'])->name('comments.show');
-});
+
 //admin routes 
 Route::middleware(['throttle:60,1', 'security', 'auth:api', 'role:admin'])->group(function () {
     //user routes
@@ -68,4 +58,15 @@ Route::middleware(['throttle:60,1', 'security', 'auth:api', 'role:developer'])->
     Route::put('tasks/{task}/status', [TaskController::class, 'statusChange'])->name('tasks.statusChange');
 });
 
+// all logged in users
+Route::middleware(['throttle:60,1', 'security', 'auth:api'])->group(function () {
+    Route::apiResource('tasks', TaskController::class)->only(['index', 'show']);
+    Route::get('tasks/blockedTasks', [TaskController::class, 'blockedTasks'])->name('tasks.blockedTasks');
+    
+    // Comment routes - all roles currently have access
+    Route::post('tasks/{task}/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::put('tasks/{task}/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
+    Route::get('tasks/{task}/commments' , [CommentController::class, 'index'])->name('comments.index');
+    Route::get('tasks/{task}/comments/{comment}',[CommentController::class, 'show'])->name('comments.show');
+});
 
