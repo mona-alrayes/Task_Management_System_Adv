@@ -14,9 +14,7 @@ with adding applity to scan files for viruces and safe uploading attachements to
 - **Operations for Authentication** : register, login , logout and refresh .
 - **Feature Testing** : testing for Users , Authentication , Tasks , Comments , Daily Tasks Reports and Error Log .
 - **Api Testing in Postman** : api testing for all routes in postman in folder of testing .
-- **Testing** : all feature testing is applied in sqlite in memory please check file **phpnit.xml** then uncomment these two lines if they are commented
-- <env name="DB_CONNECTION" value="sqlite"/>
-  <env name="DB_DATABASE" value=":memory:"/>.
+- **Testing** : all feature testing is applied in sqlite in memory please check file **phpnit.xml** 
 
 - **Repository Design Pattern**: Implements repositories and services for clean separation of concerns.
 - **Form Requests**: Validation is handled by custom form request classes.
